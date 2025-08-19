@@ -15,7 +15,7 @@ return new class extends Migration
             $table->bigIncrements('id')->comment('Primary key - Module record ID');
             $table->string('module_name');
             $table->string('module_code')->unique();
-            $table->json('module_details')->nullable();
+            $table->text('module_details')->nullable();
             $table->integer('credits')->comment('Number of credits');
             $table->unsignedBigInteger('created_by')->comment('User ID who created this module');
             $table->unsignedBigInteger('modified_by')->nullable()->comment('User ID who last modified this module');

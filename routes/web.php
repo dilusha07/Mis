@@ -4,6 +4,7 @@ use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 use App\Http\Controllers\CurriculumController;
 use App\Http\Controllers\AcademicYearController;
+use App\Http\Controllers\ModuleController;
 
 Route::get('/', function () {
     return Inertia::render('welcome');
@@ -15,6 +16,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     })->name('dashboard');
 
     Route::resource('curriculums', CurriculumController::class);
+    Route::resource('modules', ModuleController::class);
 
     Route::resource('academic-years', AcademicYearController::class);
 });
