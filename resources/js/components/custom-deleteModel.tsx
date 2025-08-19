@@ -10,6 +10,7 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
+import { Trash2 } from "lucide-react";
 
 interface CustomDeleteModelProps {
   onDelete: () => void;
@@ -21,21 +22,34 @@ export const CustomDeleteModel = ({ onDelete, triggerLabel = "Delete", className
   return (
     <AlertDialog>
       <AlertDialogTrigger asChild>
-        <Button className={className} variant="outline">
-          {triggerLabel}
+        <Button 
+          className={className}
+          variant="outline"
+        >
+          {typeof triggerLabel === 'string' ? (
+            <>
+              <Trash2 size={18} className="mr-2" />
+              {triggerLabel}
+            </>
+          ) : (
+            triggerLabel
+          )}
         </Button>
       </AlertDialogTrigger>
+      
       <AlertDialogContent>
         <AlertDialogHeader>
-          <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+          <AlertDialogTitle>Delete Confirmation</AlertDialogTitle>
           <AlertDialogDescription>
-            This action cannot be undone. This will permanently delete the selected record
-            and remove it from our system.
+            Are you sure you want to delete this item? This action cannot be undone.
           </AlertDialogDescription>
         </AlertDialogHeader>
+        
         <AlertDialogFooter>
           <AlertDialogCancel>Cancel</AlertDialogCancel>
-          <AlertDialogAction onClick={onDelete}>Delete</AlertDialogAction>
+          <AlertDialogAction onClick={onDelete} className="bg-red-600 hover:bg-red-700">
+            Delete
+          </AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>
     </AlertDialog>

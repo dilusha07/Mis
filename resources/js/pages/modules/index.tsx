@@ -9,7 +9,6 @@ import { type BreadcrumbItem } from '@/types';
 import { Head, Link, router, useForm, usePage } from '@inertiajs/react';
 import { CirclePlusIcon, X } from 'lucide-react';
 import { useEffect, useState } from 'react';
-import { DeleteConfirmationModal } from '@/components/delete-confirmation-modal';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -57,19 +56,6 @@ export default function Index({ modules, filters, totalCount, filteredCount }: I
     const { flash } = usePage<{ flash?: { success?: string; error?: string } }>().props;
     const flashMessage = flash?.success || flash?.error;
     const [showAlert, setShowAlert] = useState(flash?.success || flash?.error ? true : false);
-
-    // Delete confirmation modal state
-    const [deleteModal, setDeleteModal] = useState<{
-        isOpen: boolean;
-        moduleId: number | null;
-        moduleName: string;
-        deleteRoute: string;
-    }>({
-        isOpen: false,
-        moduleId: null,
-        moduleName: '',
-        deleteRoute: '',
-    });
 
     useEffect(() => {
         if (flashMessage) {
@@ -120,31 +106,9 @@ export default function Index({ modules, filters, totalCount, filteredCount }: I
     };
 
     const handleDelete = (routeUrl: string) => {
-        // Extract module ID and name from the route
-        const moduleId = deleteModal.moduleId;
-        const moduleName = deleteModal.moduleName;
-
-        if (moduleId && moduleName) {
-            router.delete(routeUrl, {
-                preserveScroll: true,
-                onSuccess: () => {
-                    setDeleteModal({ isOpen: false, moduleId: null, moduleName: '', deleteRoute: '' });
-                }
-            });
-        }
-    };
-
-    const openDeleteModal = (module: Module) => {
-        setDeleteModal({
-            isOpen: true,
-            moduleId: module.id,
-            moduleName: module.module_name,
-            deleteRoute: route('modules.destroy', module.id),
+        router.delete(routeUrl, {
+            preserveScroll: true,
         });
-    };
-
-    const closeDeleteModal = () => {
-        setDeleteModal({ isOpen: false, moduleId: null, moduleName: '', deleteRoute: '' });
     };
 
     return (
@@ -193,14 +157,7 @@ export default function Index({ modules, filters, totalCount, filteredCount }: I
                     actions={ModuleTableConfig.actions}
                     data={modules.data}
                     from={modules.from}
-                    onDelete={(route) => {
-                        // Find the module for this route
-                        const moduleId = route.split('/').pop();
-                        const module = modules.data.find(m => m.id.toString() === moduleId);
-                        if (module) {
-                            openDeleteModal(module);
-                        }
-                    }}
+                    onDelete={handleDelete}
                     onView={() => {}}
                     onEdit={() => {}}
                 />
@@ -212,16 +169,6 @@ export default function Index({ modules, filters, totalCount, filteredCount }: I
                     totalCount={totalCount}
                     filteredCount={filteredCount}
                     search={data.search}
-                />
-
-                {/* Delete Confirmation Modal */}
-                <DeleteConfirmationModal
-                    isOpen={deleteModal.isOpen}
-                    onClose={closeDeleteModal}
-                    onConfirm={() => handleDelete(deleteModal.deleteRoute)}
-                    title="Delete Module"
-                    message="Are you sure you want to delete this module"
-                    itemName={deleteModal.moduleName}
                 />
             </div>
         </AppLayout>
