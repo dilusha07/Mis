@@ -13,6 +13,12 @@ const mainNavItems: NavItem[] = [
         title: 'Modules',
         href: '/dashboard',
         icon: LayoutGrid,
+    },
+
+    {
+        title: 'exam',
+        href: '/exam',
+        icon: LayoutGrid,
     }
 ];
 
