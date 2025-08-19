@@ -4,9 +4,12 @@ import { NavUser } from '@/components/nav-user';
 import { Sidebar, SidebarContent, SidebarFooter, SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem } from '@/components/ui/sidebar';
 import { type NavItem } from '@/types';
 import { Link } from '@inertiajs/react';
-import { BookOpen, Folder, LayoutGrid } from 'lucide-react';
+import { BookOpen, Folder, LayoutGrid, FileText, ChevronDown, Plus, Calendar, ClipboardList } from 'lucide-react';
 import AppLogo from './app-logo';
 import { AdministrationDropdown } from './administration-dropdown';
+import { ModuleDropdown } from './module-dropdown';
+import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem } from '@/components/ui/dropdown-menu';
+import { Button } from '@/components/ui/button';
 
 const mainNavItems: NavItem[] = [
     {
@@ -15,11 +18,7 @@ const mainNavItems: NavItem[] = [
         icon: LayoutGrid,
     },
 
-    {
-        title: 'exam',
-        href: '/exam',
-        icon: LayoutGrid,
-    }
+
 ];
 
 const footerNavItems: NavItem[] = [
@@ -50,13 +49,24 @@ export function AppSidebar() {
                 </SidebarMenu>
             </SidebarHeader>
 
+
+
+
+
             <SidebarContent>
-                <NavMain items={mainNavItems} />
-                {/* Administration Dropdown */}
+                {/* <NavMain items={mainNavItems} /> */}
+                {/*Dropdown */}
                 <div className="mt-2">
+                    <ModuleDropdown />
                     <AdministrationDropdown />
+
                 </div>
+
             </SidebarContent>
+
+
+
+
 
             <SidebarFooter>
                 <NavFooter items={footerNavItems} className="mt-auto" />
