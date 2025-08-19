@@ -33,9 +33,9 @@ return new class extends Migration
             ['dept_name' => 'Department of Interdisciplinary Studies', 'dept_code' => 'IS', 'dept_type' => 'Departments', 'dept_desc' => 'Department of Interdisciplinary Studies.', 'created_by' => 1, 'modified_by' => null, 'created_at' => now(), 'updated_at' => now()],
             ['dept_name' => 'Administration', 'dept_code' => 'ADM', 'dept_type' => 'Administrative', 'dept_desc' => 'Administration department.', 'created_by' => 1, 'modified_by' => null, 'created_at' => now(), 'updated_at' => now()],
             ['dept_name' => 'Examination', 'dept_code' => 'EXM', 'dept_type' => 'Administrative', 'dept_desc' => 'Examination department.', 'created_by' => 1, 'modified_by' => null, 'created_at' => now(), 'updated_at' => now()],
-            ['dept_name' => 'Engineering Education Center', 'dept_code' => 'EEC', 'dept_type' => 'Units & Centres', 'dept_desc' => 'Engineering Education Center.', 'created_by' => 1, 'modified_by' => null, 'created_at' => now(), 'updated_at' => now()],
-            ['dept_name' => 'Library', 'dept_code' => 'LIB', 'dept_type' => 'Units & Centres', 'dept_desc' => 'Library of the Faculty of Engineering.', 'created_by' => 1, 'modified_by' => null, 'created_at' => now(), 'updated_at' => now()],
-            ['dept_name' => 'Drawing Office', 'dept_code' => 'DO', 'dept_type' => 'Units & Centres', 'dept_desc' => 'Drawing Office.', 'created_by' => 1, 'modified_by' => null, 'created_at' => now(), 'updated_at' => now()],
+            ['dept_name' => 'Engineering Education Center', 'dept_code' => 'EEC', 'dept_type' => 'Units & Centers', 'dept_desc' => 'Engineering Education Center.', 'created_by' => 1, 'modified_by' => null, 'created_at' => now(), 'updated_at' => now()],
+            ['dept_name' => 'Library', 'dept_code' => 'LIB', 'dept_type' => 'Units & Centers', 'dept_desc' => 'Library of the Faculty of Engineering.', 'created_by' => 1, 'modified_by' => null, 'created_at' => now(), 'updated_at' => now()],
+            ['dept_name' => 'Drawing Office', 'dept_code' => 'DO', 'dept_type' => 'Units & Centers', 'dept_desc' => 'Drawing Office.', 'created_by' => 1, 'modified_by' => null, 'created_at' => now(), 'updated_at' => now()],
         ]);
     }
 
