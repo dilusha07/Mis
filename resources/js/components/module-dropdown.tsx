@@ -28,8 +28,14 @@ export function ModuleDropdown({ className }: ModuleDropdownProps) {
                         </Link>
                     </DropdownMenuItem>
                     <DropdownMenuItem asChild>
-                        <Link href="/semesters" className="flex items-center">
+                        <Link href="/prerequisites" className="flex items-center">
                             <BookOpen className="mr-2 h-4 w-4" />
+                            Prerequisites
+                        </Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem asChild>
+                        <Link href="/batch-sem-modules" className="flex items-center">
+                            <Calendar className="mr-2 h-4 w-4" />
                             module plan
                         </Link>
                     </DropdownMenuItem>

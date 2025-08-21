@@ -7,6 +7,7 @@ use App\Http\Controllers\AcademicYearController;
 use App\Http\Controllers\ModuleController;
 use App\Http\Controllers\BatchSemModuleController;
 use App\Http\Controllers\BatchController;
+use App\Http\Controllers\ModulePrerequisiteController;
 
 Route::get('/', function () {
     return Inertia::render('welcome');
@@ -19,8 +20,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     Route::resource('curriculums', CurriculumController::class);
     Route::resource('modules', ModuleController::class);
-    Route::resource('semesters', BatchSemModuleController::class);
-
+    Route::resource('batch-sem-modules', BatchSemModuleController::class);
+    Route::resource('prerequisites', ModulePrerequisiteController::class);
     Route::resource('academic-years', AcademicYearController::class);
 
     Route::resource('batches', BatchController::class);

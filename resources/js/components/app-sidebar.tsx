@@ -10,6 +10,7 @@ import { AdministrationDropdown } from './administration-dropdown';
 import { ModuleDropdown } from './module-dropdown';
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem } from '@/components/ui/dropdown-menu';
 import { Button } from '@/components/ui/button';
+import { ExaminationPlanDropdown } from './examination-plan';
 
 const mainNavItems: NavItem[] = [
     {
@@ -59,6 +60,7 @@ export function AppSidebar() {
                 <div className="mt-2">
                     <ModuleDropdown />
                     <AdministrationDropdown />
+                    <ExaminationPlanDropdown />
 
                 </div>
 
