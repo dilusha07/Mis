@@ -123,7 +123,7 @@ export const CustomTable = ({ columns, actions, data, from, onDelete, onView, on
                     ) : (
                         <tr>
                             <td colSpan={7} className="text-md py-4 text-center font-bold text-red-600">
-                                No Curriculums Found!
+                                No Items Found!
                             </td>
                         </tr>
                     )}
