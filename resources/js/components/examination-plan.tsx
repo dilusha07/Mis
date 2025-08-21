@@ -22,7 +22,7 @@ export function ExaminationPlanDropdown({ className }: ExaminationPlanDropdownPr
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="start" className="w-56">
                     <DropdownMenuItem asChild>
-                        <Link href="/examination-plan" className="flex items-center">
+                        <Link href="/exam-admissions" className="flex items-center">
                             <Calendar className="mr-2 h-4 w-4" />
                             Plan Exam
                         </Link>
