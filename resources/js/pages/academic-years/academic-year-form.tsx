@@ -7,11 +7,10 @@ import AppLayout from "@/layouts/app-layout";
 import { BreadcrumbItem } from "@/types";
 import { Head, Link, useForm } from "@inertiajs/react";
 import { ArrowLeft, LoaderCircle } from "lucide-react";
-
 import React from "react";
 
 export default function AcademicYearForm({ ...props }) {
-    const { academicYear, curriculums, isView, isEdit } = props;
+    const { academicYear, isView, isEdit, curriculums } = props;
 
     const breadcrumbs: BreadcrumbItem[] = [
         {
@@ -20,7 +19,6 @@ export default function AcademicYearForm({ ...props }) {
         },
     ];
 
-    // Form state
     const { data, setData, post, processing, errors, reset } = useForm({
         academic_year: academicYear?.academic_year || "",
         year_begin: academicYear?.year_begin || "",
@@ -30,7 +28,7 @@ export default function AcademicYearForm({ ...props }) {
         _method: isEdit ? "PUT" : "POST",
     });
 
-    // Submit handler
+    // Form Submit Handler
     const submit = (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
 
@@ -63,22 +61,33 @@ export default function AcademicYearForm({ ...props }) {
                 <Card>
                     <CardHeader>
                         <CardTitle>
-                            {isView ? "Show" : isEdit ? "Update" : "Create"} Academic Year
+                            {isView
+                                ? "Show"
+                                : isEdit
+                                ? "Update"
+                                : "Create"}{" "}
+                            Academic Year
                         </CardTitle>
                     </CardHeader>
 
                     <CardContent>
-                        <form onSubmit={submit} className="flex flex-col gap-4" autoComplete="off">
+                        <form
+                            onSubmit={submit}
+                            className="flex flex-col gap-4"
+                            autoComplete="off"
+                        >
                             <div className="grid gap-6">
                                 {/* Academic Year */}
                                 <div className="grid gap-2">
                                     <Label htmlFor="academic_year">Academic Year</Label>
                                     <Input
                                         value={data.academic_year}
-                                        onChange={(e) => setData("academic_year", e.target.value)}
+                                        onChange={(e) =>
+                                            setData("academic_year", e.target.value)
+                                        }
                                         id="academic_year"
                                         type="text"
-                                        placeholder="e.g., 2023-2024"
+                                        placeholder="Enter academic year (e.g., 2024/2025)"
                                         disabled={isView || processing}
                                     />
                                     <InputError message={errors.academic_year} />
@@ -89,7 +98,9 @@ export default function AcademicYearForm({ ...props }) {
                                     <Label htmlFor="year_begin">Year Begin</Label>
                                     <Input
                                         value={data.year_begin}
-                                        onChange={(e) => setData("year_begin", e.target.value)}
+                                        onChange={(e) =>
+                                            setData("year_begin", e.target.value)
+                                        }
                                         id="year_begin"
                                         type="date"
                                         disabled={isView || processing}
@@ -102,7 +113,9 @@ export default function AcademicYearForm({ ...props }) {
                                     <Label htmlFor="year_end">Year End</Label>
                                     <Input
                                         value={data.year_end}
-                                        onChange={(e) => setData("year_end", e.target.value)}
+                                        onChange={(e) =>
+                                            setData("year_end", e.target.value)
+                                        }
                                         id="year_end"
                                         type="date"
                                         disabled={isView || processing}
@@ -114,11 +127,13 @@ export default function AcademicYearForm({ ...props }) {
                                 <div className="grid gap-2">
                                     <Label htmlFor="status">Status</Label>
                                     <select
-                                        id="status"
                                         value={data.status}
-                                        onChange={(e) => setData("status", Number(e.target.value))}
+                                        onChange={(e) =>
+                                            setData("status", parseInt(e.target.value))
+                                        }
+                                        id="status"
                                         disabled={isView || processing}
-                                        className="rounded-md border p-2"
+                                        className="rounded border px-3 py-2"
                                     >
                                         <option value={1}>Active</option>
                                         <option value={0}>Inactive</option>
@@ -127,17 +142,19 @@ export default function AcademicYearForm({ ...props }) {
                                     <InputError message={errors.status} />
                                 </div>
 
-                                {/* Curriculum (Foreign Key) */}
+                                {/* Curriculum Dropdown */}
                                 <div className="grid gap-2">
                                     <Label htmlFor="curriculum_id">Curriculum</Label>
                                     <select
-                                        id="curriculum_id"
                                         value={data.curriculum_id}
-                                        onChange={(e) => setData("curriculum_id", e.target.value)}
+                                        onChange={(e) =>
+                                            setData("curriculum_id", e.target.value)
+                                        }
+                                        id="curriculum_id"
                                         disabled={isView || processing}
-                                        className="rounded-md border p-2"
+                                        className="rounded border px-3 py-2"
                                     >
-                                        <option value="">-- Select Curriculum --</option>
+                                        <option value="">Select Curriculum</option>
                                         {curriculums?.map((c: any) => (
                                             <option key={c.id} value={c.id}>
                                                 {c.curriculum_name}
@@ -149,8 +166,13 @@ export default function AcademicYearForm({ ...props }) {
 
                                 {/* Submit */}
                                 {!isView && (
-                                    <Button type="submit" className="mt-4 w-fit cursor-pointer">
-                                        {processing && <LoaderCircle className="h-4 w-4 animate-spin" />}
+                                    <Button
+                                        type="submit"
+                                        className="mt-4 w-fit cursor-pointer"
+                                    >
+                                        {processing && (
+                                            <LoaderCircle className="h-4 w-4 animate-spin" />
+                                        )}
                                         {processing
                                             ? isEdit
                                                 ? "Updating..."

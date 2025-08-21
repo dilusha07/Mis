@@ -1,7 +1,7 @@
 export const AcademicYearTableConfig = {
     columns: [
         { label: 'Academic Year', key: 'academic_year', className: 'border p-4' },
-        { label: 'Curriculum', key: 'curriculum_name', className: 'border p-4' },
+        { label: 'Curriculum', key: 'curriculum', className: 'border p-4' },
         { label: 'Start Date', key: 'year_begin', className: 'border p-4' },
         { label: 'End Date', key: 'year_end', className: 'border p-4' },
         { label: 'Status', key: 'status', className: 'border p-4' },

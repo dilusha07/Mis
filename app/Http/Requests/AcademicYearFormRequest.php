@@ -22,11 +22,12 @@ class AcademicYearFormRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'academic_year_code' => 'required|string|max:50|unique:academic_years,academic_year_code,' . $this->academicYear?->id,
-            'academic_year_name' => 'required|string|max:150',
-            'start_date'         => 'required|date',
-            'end_date'           => 'required|date|after_or_equal:start_date',
-        ];
+        'academic_year' => 'required|string|max:191|unique:academic_years,academic_year,' ,
+        'year_begin'    => 'required|date',
+        'year_end'      => 'required|date|after:year_begin',
+        'status'        => 'required|in:0,1,2',
+        'curriculum_id' => 'required|exists:curriculums,id',
+    ];
     }
 
     /**
@@ -36,21 +37,16 @@ class AcademicYearFormRequest extends FormRequest
      */
     public function messages(): array
     {
-        return [
-            'academic_year_code.required' => 'Please enter the academic year code.',
-            'academic_year_code.string'   => 'The academic year code must be a string.',
-            'academic_year_code.max'      => 'The academic year code may not exceed 50 characters.',
-            'academic_year_code.unique'   => 'This academic year code has already been taken.',
+         return [
+            'academic_year.required' => 'Please enter the academic year (e.g., 2024-2025).',
+            'academic_year.unique'   => 'This academic year already exists.',
 
-            'academic_year_name.required' => 'Please enter the academic year name.',
-            'academic_year_name.string'   => 'The academic year name must be a string.',
+            'year_begin.required'    => 'Please select the starting date.',
+            'year_end.required'      => 'Please select the ending date.',
+            'year_end.after'         => 'The ending date must be after the starting date.',
 
-            'start_date.required'         => 'Please select the start date.',
-            'start_date.date'             => 'The start date must be a valid date.',
-
-            'end_date.required'           => 'Please select the end date.',
-            'end_date.date'               => 'The end date must be a valid date.',
-            'end_date.after_or_equal'     => 'The end date must be after or equal to the start date.',
+            'status.required'        => 'Please select the status.',
+            'curriculum_id.required' => 'Please select a curriculum.',
         ];
     }
 }
