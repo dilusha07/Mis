@@ -5,6 +5,7 @@ use Inertia\Inertia;
 use App\Http\Controllers\CurriculumController;
 use App\Http\Controllers\AcademicYearController;
 use App\Http\Controllers\ModuleController;
+use App\Http\Controllers\BatchController;
 
 Route::get('/', function () {
     return Inertia::render('welcome');
@@ -19,6 +20,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::resource('modules', ModuleController::class);
 
     Route::resource('academic-years', AcademicYearController::class);
+
+    Route::resource('batches', BatchController::class);
+  
 });
 
 require __DIR__.'/settings.php';
