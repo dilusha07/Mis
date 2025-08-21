@@ -11,6 +11,7 @@ import { ModuleDropdown } from './module-dropdown';
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem } from '@/components/ui/dropdown-menu';
 import { Button } from '@/components/ui/button';
 import { ExaminationPlanDropdown } from './examination-plan';
+import { StudentDropdown } from './student-dropdown';
 
 const mainNavItems: NavItem[] = [
     {
@@ -61,6 +62,7 @@ export function AppSidebar() {
                     <ModuleDropdown />
                     <AdministrationDropdown />
                     <ExaminationPlanDropdown />
+                    <StudentDropdown />
 
                 </div>
 

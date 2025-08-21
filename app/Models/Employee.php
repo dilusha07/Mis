@@ -10,6 +10,8 @@ class Employee extends Model
 {
     use HasFactory;
 
+    protected $table = 'employees';
+
     protected $fillable = [
         'user_id',
         'department_id',
@@ -54,5 +56,13 @@ class Employee extends Model
     public function category(): BelongsTo
     {
         return $this->belongsTo(EmployeeCategory::class);
+    }
+
+    /**
+     * Get the employee's full name
+     */
+    public function getNameAttribute()
+    {
+        return $this->full_name ?: ($this->first_name . ' ' . $this->last_name);
     }
 }
