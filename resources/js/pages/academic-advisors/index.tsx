@@ -3,7 +3,7 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Pagination } from '@/components/ui/pagination';
-import { ModuleTableConfig } from '@/config/tables/module-table';
+import { AcademicAdvisorTableConfig } from '@/config/tables/academic-advisor-table';
 import AppLayout from '@/layouts/app-layout';
 import { type BreadcrumbItem } from '@/types';
 import { Head, Link, router, useForm, usePage } from '@inertiajs/react';
@@ -12,8 +12,8 @@ import { useEffect, useState } from 'react';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
-        title: 'Manage Modules',
-        href: '/modules',
+        title: 'Manage Academic Advisors',
+        href: '/academic-advisors',
     },
 ];
 
@@ -23,17 +23,16 @@ interface LinkProps {
     url: string;
 }
 
-interface Module {
+interface AcademicAdvisor {
     id: number;
-    module_name: string;
-    module_code: string;
-    module_details: string;
-    credits: number;
+    student_name: string;
+    student_id: string;
+    advisor_name: string;
     created_at: string;
 }
 
-interface ModulePagination {
-    data: Module[];
+interface AcademicAdvisorPagination {
+    data: AcademicAdvisor[];
     links: LinkProps[];
     from: number;
     to: number;
@@ -46,13 +45,13 @@ interface FilterProps {
 }
 
 interface IndexProps {
-    modules: ModulePagination;
+    academicAdvisors: AcademicAdvisorPagination;
     filters: FilterProps;
     totalCount: number;
     filteredCount: number;
 }
 
-export default function Index({ modules, filters, totalCount, filteredCount }: IndexProps) {
+export default function Index({ academicAdvisors, filters, totalCount, filteredCount }: IndexProps) {
     const { flash } = usePage<{ flash?: { success?: string; error?: string } }>().props;
     const flashMessage = flash?.success || flash?.error;
     const [showAlert, setShowAlert] = useState(flash?.success || flash?.error ? true : false);
@@ -78,7 +77,7 @@ export default function Index({ modules, filters, totalCount, filteredCount }: I
             ...(data.perPage && { perPage: data.perPage }),
         };
 
-        router.get(route('modules.index'), queryString, {
+        router.get(route('academic-advisors.index'), queryString, {
             preserveState: true,
             preserveScroll: true,
         });
@@ -88,7 +87,7 @@ export default function Index({ modules, filters, totalCount, filteredCount }: I
         setData('search', '');
         setData('perPage', '10');
 
-        router.get(route('modules.index'), {}, { preserveState: true, preserveScroll: true });
+        router.get(route('academic-advisors.index'), {}, { preserveState: true, preserveScroll: true });
     };
 
     const handlePerPageChange = (value: string) => {
@@ -99,7 +98,7 @@ export default function Index({ modules, filters, totalCount, filteredCount }: I
             ...(value && { perPage: value }),
         };
 
-        router.get(route('modules.index'), queryString, {
+        router.get(route('academic-advisors.index'), queryString, {
             preserveState: true,
             preserveScroll: true,
         });
@@ -111,9 +110,17 @@ export default function Index({ modules, filters, totalCount, filteredCount }: I
         });
     };
 
+    const handleView = (item: any) => {
+        router.get(route('academic-advisors.show', item.id));
+    };
+
+    const handleEdit = (item: any) => {
+        router.get(route('academic-advisors.edit', item.id));
+    };
+
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
-            <Head title="Module Management" />
+            <Head title="Academic Advisor Management" />
             <div className="flex h-full flex-1 flex-col gap-4 rounded-xl p-4">
                 {showAlert && flashMessage && (
                     <Alert
@@ -133,7 +140,7 @@ export default function Index({ modules, filters, totalCount, filteredCount }: I
                         value={data.search}
                         onChange={handleChange}
                         className="h-10 w-1/2"
-                        placeholder="Search Module..."
+                        placeholder="Search Student or Advisor..."
                         name="search"
                     />
 
@@ -145,44 +152,33 @@ export default function Index({ modules, filters, totalCount, filteredCount }: I
                         <Link
                             className="text-md flex cursor-pointer items-center rounded-lg bg-indigo-800 px-4 py-2 text-white hover:opacity-90"
                             as="button"
-                            href={route('modules.create')}
+                            href={route('academic-advisors.create')}
                         >
-                            <CirclePlusIcon className="me-2" /> Add Module
+                            <CirclePlusIcon className="me-2" /> Assign Academic Advisor
                         </Link>
                     </div>
                 </div>
 
                 <CustomTable
-                    columns={ModuleTableConfig.columns}
-                    actions={ModuleTableConfig.actions}
-                    data={modules.data}
-                    from={modules.from}
+                    columns={AcademicAdvisorTableConfig.columns}
+                    actions={AcademicAdvisorTableConfig.actions}
+                    data={academicAdvisors.data}
+                    from={academicAdvisors.from}
                     onDelete={handleDelete}
-                    onView={() => {}}
-                    onEdit={() => {}}
+                    onView={handleView}
+                    onEdit={handleEdit}
+                    isModal={true}
                 />
 
                 <Pagination
-                    products={modules}
+                    products={academicAdvisors}
                     perPage={data.perPage}
                     onPerPageChange={handlePerPageChange}
                     totalCount={totalCount}
                     filteredCount={filteredCount}
                     search={data.search}
                 />
-
-                {/* Delete Confirmation Modal */}
-                {/* <DeleteConfirmationModal
-                    isOpen={deleteModal.isOpen}
-                    onClose={closeDeleteModal}
-                    onConfirm={() => handleDelete(deleteModal.deleteRoute)}
-                    title="Delete Module"
-                    message="Are you sure you want to delete this module"
-                    itemName={deleteModal.moduleName}
-                /> */}
             </div>
         </AppLayout>
     );
 }
-
-

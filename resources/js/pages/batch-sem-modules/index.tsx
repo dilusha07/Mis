@@ -3,7 +3,7 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Pagination } from '@/components/ui/pagination';
-import { ModuleTableConfig } from '@/config/tables/module-table';
+import { BatchSemModuleTableConfig } from '@/config/tables/batch-sem-module-table';
 import AppLayout from '@/layouts/app-layout';
 import { type BreadcrumbItem } from '@/types';
 import { Head, Link, router, useForm, usePage } from '@inertiajs/react';
@@ -12,8 +12,8 @@ import { useEffect, useState } from 'react';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
-        title: 'Manage Modules',
-        href: '/modules',
+        title: 'Manage Batch Semester Modules',
+        href: '/batch-sem-modules',
     },
 ];
 
@@ -23,17 +23,20 @@ interface LinkProps {
     url: string;
 }
 
-interface Module {
+interface BatchSemModule {
     id: number;
     module_name: string;
     module_code: string;
-    module_details: string;
-    credits: number;
+    semester: string;
+    module_type: string;
+    gpa_applicability: string;
+    module_coordinator: string;
+    lecture: string;
     created_at: string;
 }
 
-interface ModulePagination {
-    data: Module[];
+interface BatchSemModulePagination {
+    data: BatchSemModule[];
     links: LinkProps[];
     from: number;
     to: number;
@@ -46,13 +49,13 @@ interface FilterProps {
 }
 
 interface IndexProps {
-    modules: ModulePagination;
+    batchSemModules: BatchSemModulePagination;
     filters: FilterProps;
     totalCount: number;
     filteredCount: number;
 }
 
-export default function Index({ modules, filters, totalCount, filteredCount }: IndexProps) {
+export default function Index({ batchSemModules, filters, totalCount, filteredCount }: IndexProps) {
     const { flash } = usePage<{ flash?: { success?: string; error?: string } }>().props;
     const flashMessage = flash?.success || flash?.error;
     const [showAlert, setShowAlert] = useState(flash?.success || flash?.error ? true : false);
@@ -78,7 +81,7 @@ export default function Index({ modules, filters, totalCount, filteredCount }: I
             ...(data.perPage && { perPage: data.perPage }),
         };
 
-        router.get(route('modules.index'), queryString, {
+        router.get(route('batch-sem-modules.index'), queryString, {
             preserveState: true,
             preserveScroll: true,
         });
@@ -88,7 +91,7 @@ export default function Index({ modules, filters, totalCount, filteredCount }: I
         setData('search', '');
         setData('perPage', '10');
 
-        router.get(route('modules.index'), {}, { preserveState: true, preserveScroll: true });
+        router.get(route('batch-sem-modules.index'), {}, { preserveState: true, preserveScroll: true });
     };
 
     const handlePerPageChange = (value: string) => {
@@ -99,7 +102,7 @@ export default function Index({ modules, filters, totalCount, filteredCount }: I
             ...(value && { perPage: value }),
         };
 
-        router.get(route('modules.index'), queryString, {
+        router.get(route('batch-sem-modules.index'), queryString, {
             preserveState: true,
             preserveScroll: true,
         });
@@ -113,7 +116,7 @@ export default function Index({ modules, filters, totalCount, filteredCount }: I
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
-            <Head title="Module Management" />
+            <Head title="Batch Semester Module Management" />
             <div className="flex h-full flex-1 flex-col gap-4 rounded-xl p-4">
                 {showAlert && flashMessage && (
                     <Alert
@@ -133,7 +136,7 @@ export default function Index({ modules, filters, totalCount, filteredCount }: I
                         value={data.search}
                         onChange={handleChange}
                         className="h-10 w-1/2"
-                        placeholder="Search Module..."
+                        placeholder="Search Batch Semester Module..."
                         name="search"
                     />
 
@@ -145,44 +148,32 @@ export default function Index({ modules, filters, totalCount, filteredCount }: I
                         <Link
                             className="text-md flex cursor-pointer items-center rounded-lg bg-indigo-800 px-4 py-2 text-white hover:opacity-90"
                             as="button"
-                            href={route('modules.create')}
+                            href={route('batch-sem-modules.create')}
                         >
-                            <CirclePlusIcon className="me-2" /> Add Module
+                            <CirclePlusIcon className="me-2" /> Add Batch Semester Module
                         </Link>
                     </div>
                 </div>
 
                 <CustomTable
-                    columns={ModuleTableConfig.columns}
-                    actions={ModuleTableConfig.actions}
-                    data={modules.data}
-                    from={modules.from}
+                    columns={BatchSemModuleTableConfig.columns}
+                    actions={BatchSemModuleTableConfig.actions}
+                    data={batchSemModules.data}
+                    from={batchSemModules.from}
                     onDelete={handleDelete}
                     onView={() => {}}
                     onEdit={() => {}}
                 />
 
                 <Pagination
-                    products={modules}
+                    products={batchSemModules}
                     perPage={data.perPage}
                     onPerPageChange={handlePerPageChange}
                     totalCount={totalCount}
                     filteredCount={filteredCount}
                     search={data.search}
                 />
-
-                {/* Delete Confirmation Modal */}
-                {/* <DeleteConfirmationModal
-                    isOpen={deleteModal.isOpen}
-                    onClose={closeDeleteModal}
-                    onConfirm={() => handleDelete(deleteModal.deleteRoute)}
-                    title="Delete Module"
-                    message="Are you sure you want to delete this module"
-                    itemName={deleteModal.moduleName}
-                /> */}
             </div>
         </AppLayout>
     );
 }
-
-

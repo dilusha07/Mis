@@ -27,30 +27,36 @@ export function ModuleDropdown({ className }: ModuleDropdownProps) {
                             Add Module
                         </Link>
                     </DropdownMenuItem>
-                    {/* <DropdownMenuItem asChild>
-                        <Link href="/modules" className="flex items-center">
+                    <DropdownMenuItem asChild>
+                        <Link href="/prerequisites" className="flex items-center">
                             <BookOpen className="mr-2 h-4 w-4" />
-                            View All Modules
+                            Prerequisites
                         </Link>
-                    </DropdownMenuItem> */}
+                    </DropdownMenuItem>
+                    <DropdownMenuItem asChild>
+                        <Link href="/batch-sem-modules" className="flex items-center">
+                            <Calendar className="mr-2 h-4 w-4" />
+                            Module Plan
+                        </Link>
+                    </DropdownMenuItem>
                     {/* <DropdownMenuItem asChild>
                         <Link href="/modules/create" className="flex items-center">
                             <Settings className="mr-2 h-4 w-4" />
                             Module Settings
                         </Link>
-                    </DropdownMenuItem> */}
-                    <DropdownMenuItem className="flex items-center">
-                        <Calendar className="mr-2 h-4 w-4" />
-                        Semester Plan
-                    </DropdownMenuItem>
-                    <DropdownMenuItem className="flex items-center">
+                    // </DropdownMenuItem> */}
+                    {/* // <DropdownMenuItem className="flex items-center">
+                    //     <Calendar className="mr-2 h-4 w-4" />
+                    //     Semester Plan
+                    // </DropdownMenuItem> */}
+                    {/* <DropdownMenuItem className="flex items-center">
                         <ClipboardList className="mr-2 h-4 w-4" />
                         Examination Plan
                     </DropdownMenuItem>
                     <DropdownMenuItem className="flex items-center">
                         <Users className="mr-2 h-4 w-4" />
                         Student Enrollment
-                    </DropdownMenuItem>
+                    </DropdownMenuItem> */}
                 </DropdownMenuContent>
             </DropdownMenu>
         </div>

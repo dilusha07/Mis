@@ -3,7 +3,7 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Pagination } from '@/components/ui/pagination';
-import { ModuleTableConfig } from '@/config/tables/module-table';
+import { ExamAdmissionTableConfig } from '@/config/tables/exam-admission-table';
 import AppLayout from '@/layouts/app-layout';
 import { type BreadcrumbItem } from '@/types';
 import { Head, Link, router, useForm, usePage } from '@inertiajs/react';
@@ -12,8 +12,8 @@ import { useEffect, useState } from 'react';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
-        title: 'Manage Modules',
-        href: '/modules',
+        title: 'Manage Exam Admissions',
+        href: '/exam-admissions',
     },
 ];
 
@@ -23,17 +23,21 @@ interface LinkProps {
     url: string;
 }
 
-interface Module {
+interface ExamAdmission {
     id: number;
     module_name: string;
     module_code: string;
-    module_details: string;
-    credits: number;
+    semester: string;
+    exam_date: string;
+    start_time: string;
+    end_time: string;
+    venue: string;
+    student_group: string;
     created_at: string;
 }
 
-interface ModulePagination {
-    data: Module[];
+interface ExamAdmissionPagination {
+    data: ExamAdmission[];
     links: LinkProps[];
     from: number;
     to: number;
@@ -46,13 +50,13 @@ interface FilterProps {
 }
 
 interface IndexProps {
-    modules: ModulePagination;
+    examAdmissions: ExamAdmissionPagination;
     filters: FilterProps;
     totalCount: number;
     filteredCount: number;
 }
 
-export default function Index({ modules, filters, totalCount, filteredCount }: IndexProps) {
+export default function Index({ examAdmissions, filters, totalCount, filteredCount }: IndexProps) {
     const { flash } = usePage<{ flash?: { success?: string; error?: string } }>().props;
     const flashMessage = flash?.success || flash?.error;
     const [showAlert, setShowAlert] = useState(flash?.success || flash?.error ? true : false);
@@ -78,7 +82,7 @@ export default function Index({ modules, filters, totalCount, filteredCount }: I
             ...(data.perPage && { perPage: data.perPage }),
         };
 
-        router.get(route('modules.index'), queryString, {
+        router.get(route('exam-admissions.index'), queryString, {
             preserveState: true,
             preserveScroll: true,
         });
@@ -88,7 +92,7 @@ export default function Index({ modules, filters, totalCount, filteredCount }: I
         setData('search', '');
         setData('perPage', '10');
 
-        router.get(route('modules.index'), {}, { preserveState: true, preserveScroll: true });
+        router.get(route('exam-admissions.index'), {}, { preserveState: true, preserveScroll: true });
     };
 
     const handlePerPageChange = (value: string) => {
@@ -99,7 +103,7 @@ export default function Index({ modules, filters, totalCount, filteredCount }: I
             ...(value && { perPage: value }),
         };
 
-        router.get(route('modules.index'), queryString, {
+        router.get(route('exam-admissions.index'), queryString, {
             preserveState: true,
             preserveScroll: true,
         });
@@ -113,7 +117,7 @@ export default function Index({ modules, filters, totalCount, filteredCount }: I
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
-            <Head title="Module Management" />
+            <Head title="Exam Admission Management" />
             <div className="flex h-full flex-1 flex-col gap-4 rounded-xl p-4">
                 {showAlert && flashMessage && (
                     <Alert
@@ -133,7 +137,7 @@ export default function Index({ modules, filters, totalCount, filteredCount }: I
                         value={data.search}
                         onChange={handleChange}
                         className="h-10 w-1/2"
-                        placeholder="Search Module..."
+                        placeholder="Search Exam Admission..."
                         name="search"
                     />
 
@@ -145,44 +149,32 @@ export default function Index({ modules, filters, totalCount, filteredCount }: I
                         <Link
                             className="text-md flex cursor-pointer items-center rounded-lg bg-indigo-800 px-4 py-2 text-white hover:opacity-90"
                             as="button"
-                            href={route('modules.create')}
+                            href={route('exam-admissions.create')}
                         >
-                            <CirclePlusIcon className="me-2" /> Add Module
+                            <CirclePlusIcon className="me-2" /> Add Exam Admission
                         </Link>
                     </div>
                 </div>
 
                 <CustomTable
-                    columns={ModuleTableConfig.columns}
-                    actions={ModuleTableConfig.actions}
-                    data={modules.data}
-                    from={modules.from}
+                    columns={ExamAdmissionTableConfig.columns}
+                    actions={ExamAdmissionTableConfig.actions}
+                    data={examAdmissions.data}
+                    from={examAdmissions.from}
                     onDelete={handleDelete}
                     onView={() => {}}
                     onEdit={() => {}}
                 />
 
                 <Pagination
-                    products={modules}
+                    products={examAdmissions}
                     perPage={data.perPage}
                     onPerPageChange={handlePerPageChange}
                     totalCount={totalCount}
                     filteredCount={filteredCount}
                     search={data.search}
                 />
-
-                {/* Delete Confirmation Modal */}
-                {/* <DeleteConfirmationModal
-                    isOpen={deleteModal.isOpen}
-                    onClose={closeDeleteModal}
-                    onConfirm={() => handleDelete(deleteModal.deleteRoute)}
-                    title="Delete Module"
-                    message="Are you sure you want to delete this module"
-                    itemName={deleteModal.moduleName}
-                /> */}
             </div>
         </AppLayout>
     );
 }
-
-
