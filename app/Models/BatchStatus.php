@@ -46,4 +46,10 @@ class BatchStatus extends Model
         return $this->belongsTo(AcademicYear::class, 'acc_year_id');
     }
 
+    // Accessor for readable status
+    public function getStatusTextAttribute()
+    {
+        return $this->status == 1 ? 'Active' : 'Passing Out';
+    }
+
 }

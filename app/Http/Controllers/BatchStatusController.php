@@ -40,7 +40,7 @@ class BatchStatusController extends Controller
                 'academic_year' => $status->academicYear?->academic_year,
                 'degree_year'   => $status->degree_year,
                 'semester'      => $status->semester,
-                'status'        => $status->status,
+                'status'        => $status->status_text,
                 'created_at'    => $status->created_at->format('d M Y'),
             ]);
 
@@ -60,7 +60,7 @@ class BatchStatusController extends Controller
                 'academic_year' => $status->academicYear?->academic_year,
                 'degree_year'   => $status->degree_year,
                 'semester'      => $status->semester,
-                'status'        => $status->status,
+                'status'        => $status->status_text,
                 'created_at'    => $status->created_at->format('d M Y'),
             ]);
         }
