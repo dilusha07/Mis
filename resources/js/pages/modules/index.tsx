@@ -215,14 +215,14 @@ export default function Index({ modules, filters, totalCount, filteredCount }: I
                 />
 
                 {/* Delete Confirmation Modal */}
-                <DeleteConfirmationModal
+                {/* <DeleteConfirmationModal
                     isOpen={deleteModal.isOpen}
                     onClose={closeDeleteModal}
                     onConfirm={() => handleDelete(deleteModal.deleteRoute)}
                     title="Delete Module"
                     message="Are you sure you want to delete this module"
                     itemName={deleteModal.moduleName}
-                />
+                /> */}
             </div>
         </AppLayout>
     );
