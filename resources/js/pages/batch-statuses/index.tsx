@@ -111,9 +111,7 @@ export default function Index({ batchStatuses, filters, totalCount, filteredCoun
 
     // Delete handler
     const handleDelete = (routePath: string) => {
-        if (confirm("Are you sure you want to delete this batch status?")) {
             router.delete(routePath, { preserveScroll: true });
-        }
     };
 
     return (
