@@ -48,6 +48,16 @@ export function AdministrationDropdown() {
                         Batches
                     </Link>
                 </DropdownMenuItem>
+                 <DropdownMenuItem asChild>
+                    <Link
+                        href="/batch-statuses"
+                        className={`w-full block px-3 py-2 text-sm rounded hover:bg-accent hover:text-accent-foreground ${
+                            currentUrl === '/batch-statuses' ? 'font-semibold bg-accent' : ''
+                        }`}
+                    >
+                        Batch Status
+                    </Link>
+                </DropdownMenuItem>
             </DropdownMenuContent>
         </DropdownMenu>
     );
