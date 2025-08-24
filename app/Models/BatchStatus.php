@@ -27,7 +27,7 @@ class BatchStatus extends Model
     ];
     
     protected $casts = [
-        'semester_order' => 'array', // Laravel automatically casts JSON <-> array
+        'semester_order' => 'array', 
         'created_at' => 'datetime',
         'updated_at' => 'datetime',
     ];
@@ -50,6 +50,16 @@ class BatchStatus extends Model
     public function getStatusTextAttribute()
     {
         return $this->status == 1 ? 'Active' : 'Passing Out';
+    }
+
+     public function getBatchNameAttribute()
+    {
+        return $this->batch?->batch_name ?? '';
+    }
+
+    public function getAcademicYearNameAttribute()
+    {
+        return $this->academicYear?->academic_year ?? '';
     }
 
 }
