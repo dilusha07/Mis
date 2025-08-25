@@ -120,8 +120,15 @@ class CurriculumController extends Controller
     public function show(Curriculum $curriculum)
     {
          return Inertia::render('curriculums/curriculum-form', [
-            'curriculum' => $curriculum,
-            'isView'     => true,
+            'curriculum' => [
+            'id'                => $curriculum->id,
+            'curriculum_code'   => $curriculum->curriculum_code,
+            'curriculum_name'   => $curriculum->curriculum_name,
+            'start_date'        => $curriculum->start_date?->format('Y-m-d'), 
+            'start_batch_from'  => $curriculum->start_batch_from,
+            'end_batch_to'      => $curriculum->end_batch_to,
+        ],
+        'isView' => true,
         ]);
     }
 
@@ -131,8 +138,15 @@ class CurriculumController extends Controller
     public function edit(Curriculum $curriculum)
     {
          return Inertia::render('curriculums/curriculum-form', [
-            'curriculum' => $curriculum,
-            'isEdit'     => true,
+            'curriculum' => [
+            'id'                => $curriculum->id,
+            'curriculum_code'   => $curriculum->curriculum_code,
+            'curriculum_name'   => $curriculum->curriculum_name,
+            'start_date'        => $curriculum->start_date?->format('Y-m-d'), 
+            'start_batch_from'  => $curriculum->start_batch_from,
+            'end_batch_to'      => $curriculum->end_batch_to,
+        ],
+        'isEdit' => true,
         ]);
     }
 

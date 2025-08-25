@@ -77,7 +77,7 @@ class AcademicYearController extends Controller
     public function show(AcademicYear $academicYear)
     {
         return Inertia::render('academic-years/academic-year-form', [
-            'academicYear' => $academicYear->load('curriculum'),
+            'academicYear' => $this->formatForForm($academicYear),
             'isView' => true,
         ]);
     }
@@ -85,7 +85,7 @@ class AcademicYearController extends Controller
     public function edit(AcademicYear $academicYear)
     {
         return Inertia::render('academic-years/academic-year-form', [
-            'academicYear' => $academicYear,
+            'academicYear' => $this->formatForForm($academicYear),
             'curriculums'  => Curriculum::all(['id', 'curriculum_name']),
             'isEdit' => true,
         ]);
@@ -128,9 +128,25 @@ class AcademicYearController extends Controller
             'academic_year' => $year->academic_year,
             'year_begin'    => $year->year_begin->format('d M Y'),
             'year_end'      => $year->year_end->format('d M Y'),
-            'status'        => $year->status,
+            'status'        => $year->status == 1 ? 'Active' : 'Inactive',
             'curriculum'    => $year->curriculum?->curriculum_name,
             'created_at'    => $year->created_at->format('d M Y'),
+        ];
+    }
+
+    /**
+     * Format dates for form (edit/view mode)
+     */
+    private function formatForForm(AcademicYear $year)
+    {
+        return [
+            'id'            => $year->id,
+            'academic_year' => $year->academic_year,
+            'year_begin'    => $year->year_begin?->format('Y-m-d'),
+            'year_end'      => $year->year_end?->format('Y-m-d'),
+            'status'        => $year->status == 1 ? 'Active' : 'Inactive',
+            'curriculum_id' => $year->curriculum_id,
+            'curriculum_name'  => $year->curriculum?->curriculum_name,
         ];
     }
 }
