@@ -31,7 +31,9 @@ export default function ExamAdmissionForm({ ...props }) {
     ];
 
     const { data, setData, post, processing, errors, reset } = useForm({
-        batch_sem_module_id: examAdmission?.batch_sem_module_id || '',
+        batch_sem_module_id: examAdmission?.batch_sem_module_id !== undefined && examAdmission?.batch_sem_module_id !== null
+            ? String(examAdmission.batch_sem_module_id)
+            : '',
         exam_date: examAdmission?.exam_date || '',
         start_time: examAdmission?.start_time || '',
         end_time: examAdmission?.end_time || '',

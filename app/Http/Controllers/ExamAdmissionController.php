@@ -115,13 +115,37 @@ class ExamAdmissionController extends Controller
     public function show(ExamAdmission $examAdmission)
     {
         $examAdmission->load(['batchSemModule.module', 'batchSemModule.batchStatus']);
-        
+
+        // Format fields for form inputs
+        $examAdmissionData = [
+            'id' => $examAdmission->id,
+            'batch_sem_module_id' => $examAdmission->batch_sem_module_id,
+            'exam_date' => $examAdmission->exam_date?->format('Y-m-d'),
+            'start_time' => $examAdmission->start_time?->format('H:i'),
+            'end_time' => $examAdmission->end_time?->format('H:i'),
+            'venue' => $examAdmission->venue,
+            'student_group' => $examAdmission->student_group,
+            'created_at' => $examAdmission->created_at?->toISOString(),
+            'updated_at' => $examAdmission->updated_at?->toISOString(),
+            'batchSemModule' => [
+                'id' => $examAdmission->batchSemModule?->id,
+                'semester' => $examAdmission->batchSemModule?->semester,
+                'module' => [
+                    'module_name' => $examAdmission->batchSemModule?->module?->module_name,
+                    'module_code' => $examAdmission->batchSemModule?->module?->module_code,
+                ],
+                'batchStatus' => [
+                    'status' => $examAdmission->batchSemModule?->batchStatus?->status,
+                ],
+            ],
+        ];
+
         $batchSemModules = BatchSemModule::with(['module', 'batchStatus'])
             ->select('id', 'module_id', 'semester', 'batch_status_id')
             ->get();
 
         return Inertia::render('exam-admissions/exam-admission-form', [
-            'examAdmission' => $examAdmission,
+            'examAdmission' => $examAdmissionData,
             'batchSemModules' => $batchSemModules,
             'isView' => true,
         ]);
@@ -133,13 +157,37 @@ class ExamAdmissionController extends Controller
     public function edit(ExamAdmission $examAdmission)
     {
         $examAdmission->load(['batchSemModule.module', 'batchSemModule.batchStatus']);
-        
+
+        // Format fields for form inputs
+        $examAdmissionData = [
+            'id' => $examAdmission->id,
+            'batch_sem_module_id' => $examAdmission->batch_sem_module_id,
+            'exam_date' => $examAdmission->exam_date?->format('Y-m-d'),
+            'start_time' => $examAdmission->start_time?->format('H:i'),
+            'end_time' => $examAdmission->end_time?->format('H:i'),
+            'venue' => $examAdmission->venue,
+            'student_group' => $examAdmission->student_group,
+            'created_at' => $examAdmission->created_at?->toISOString(),
+            'updated_at' => $examAdmission->updated_at?->toISOString(),
+            'batchSemModule' => [
+                'id' => $examAdmission->batchSemModule?->id,
+                'semester' => $examAdmission->batchSemModule?->semester,
+                'module' => [
+                    'module_name' => $examAdmission->batchSemModule?->module?->module_name,
+                    'module_code' => $examAdmission->batchSemModule?->module?->module_code,
+                ],
+                'batchStatus' => [
+                    'status' => $examAdmission->batchSemModule?->batchStatus?->status,
+                ],
+            ],
+        ];
+
         $batchSemModules = BatchSemModule::with(['module', 'batchStatus'])
             ->select('id', 'module_id', 'semester', 'batch_status_id')
             ->get();
 
         return Inertia::render('exam-admissions/exam-admission-form', [
-            'examAdmission' => $examAdmission,
+            'examAdmission' => $examAdmissionData,
             'batchSemModules' => $batchSemModules,
             'isEdit' => true,
         ]);

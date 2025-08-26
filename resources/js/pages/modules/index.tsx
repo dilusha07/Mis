@@ -27,8 +27,13 @@ interface Module {
     id: number;
     module_name: string;
     module_code: string;
-    module_details: string;
+    module_details: any; // plain text from controller
     credits: number;
+    semester?: string;
+    module_type?: string;
+    allowed_stream?: string[] | string;
+    curriculum_id?: number;
+    department_id?: number;
     created_at: string;
 }
 
