@@ -25,6 +25,13 @@ class ModuleFormRequest extends FormRequest
             'module_code'    => 'required|string|max:100',
             'module_details' => 'nullable|string|max:1000',
             'credits'        => 'required|integer|min:0',
+
+            // New optional fields from migration
+            'semester'       => 'nullable|string|in:Semester 0,Semester 1,Semester 2,Semester 3,Semester 4,Semester 5,Semester 6,Semester 7,Semester 8,Semester 9',
+            'module_type'    => 'nullable|string|in:Core,General Elective,Technical Elective,Common Core',
+            'allowed_stream' => 'nullable', // accept string/json/array; normalized in controller
+            'curriculum_id'  => 'nullable|integer|exists:curriculums,id',
+            'department_id'  => 'nullable|integer|exists:departments,id',
         ];
     }
 

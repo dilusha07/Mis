@@ -15,6 +15,11 @@ class Module extends Model
         'module_code',
         'module_details',
         'credits',
+        'semester',
+        'module_type',
+        'allowed_stream',
+        'curriculum_id',
+        'department_id',
         'created_by',
         'modified_by',
         'created_at',
@@ -23,5 +28,6 @@ class Module extends Model
 
     protected $casts = [
         // No casting needed - handling JSON manually in controller
+        'allowed_stream' => 'array',
     ];
 }

@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Models\Module;
+use App\Models\Curriculum;
+use App\Models\Department;
 use App\Http\Requests\ModuleFormRequest;
 use Exception;
 use Illuminate\Http\Request;
@@ -22,6 +24,28 @@ class ModuleController extends Controller
             return is_array($decoded) && isset($decoded['content']) ? (string) $decoded['content'] : (string) $moduleDetails;
         }
         return '';
+    }
+
+    /**
+     * Normalize allowed_stream to an array of strings.
+     */
+    private function normalizeAllowedStream($value): array
+    {
+        if (is_array($value)) {
+            return array_values(array_filter(array_map(fn($v) => is_string($v) ? trim($v) : $v, $value), fn($v) => $v !== '' && $v !== null));
+        }
+
+        if (is_string($value)) {
+            $json = json_decode($value, true);
+            if (json_last_error() === JSON_ERROR_NONE && is_array($json)) {
+                return $this->normalizeAllowedStream($json);
+            }
+            // comma-separated list
+            $parts = array_map('trim', explode(',', $value));
+            return array_values(array_filter($parts, fn($v) => $v !== ''));
+        }
+
+        return [];
     }
 
     /**
@@ -51,6 +75,11 @@ class ModuleController extends Controller
                     'module_code' => $m->module_code,
                     'module_details' => $this->getModuleDetailsText($m->module_details),
                     'credits' => $m->credits,
+                    'semester' => $m->semester,
+                    'module_type' => $m->module_type,
+                    'allowed_stream' => $m->allowed_stream,
+                    'curriculum_id' => $m->curriculum_id,
+                    'department_id' => $m->department_id,
                     'created_at' => $m->created_at?->format('d M Y'),
                 ]);
 
@@ -70,6 +99,11 @@ class ModuleController extends Controller
                     'module_code' => $m->module_code,
                     'module_details' => $this->getModuleDetailsText($m->module_details),
                     'credits' => $m->credits,
+                    'semester' => $m->semester,
+                    'module_type' => $m->module_type,
+                    'allowed_stream' => $m->allowed_stream,
+                    'curriculum_id' => $m->curriculum_id,
+                    'department_id' => $m->department_id,
                     'created_at' => $m->created_at?->format('d M Y'),
                 ]);
             }
@@ -93,7 +127,13 @@ class ModuleController extends Controller
     public function create()
     {
         try {
-            return Inertia::render('modules/module-form');
+            $curriculums = Curriculum::select('id', 'curriculum_name')->orderBy('curriculum_name')->get();
+            $departments = Department::where('dept_type', 'Departments')->select('id', 'dept_name')->orderBy('dept_name')->get();
+
+            return Inertia::render('modules/module-form', [
+                'curriculums' => $curriculums,
+                'departments' => $departments,
+            ]);
         } catch (Exception $e) {
             Log::error('Module create form failed: ' . $e->getMessage());
             return redirect()->back()->with('error', 'Unable to load create form. Please try again!');
@@ -114,6 +154,10 @@ class ModuleController extends Controller
                     'content' => $content,
                     'type' => 'text',
                 ]);
+            }
+
+            if (isset($validatedData['allowed_stream'])) {
+                $validatedData['allowed_stream'] = $this->normalizeAllowedStream($validatedData['allowed_stream']);
             }
 
             $module = Module::create($validatedData + [
@@ -141,10 +185,14 @@ class ModuleController extends Controller
     {
         try {
             $module->module_details = $this->getModuleDetailsText($module->module_details);
+            $curriculums = Curriculum::select('id', 'curriculum_name')->orderBy('curriculum_name')->get();
+            $departments = Department::where('dept_type', 'Departments')->select('id', 'dept_name')->orderBy('dept_name')->get();
 
             return Inertia::render('modules/module-form', [
                 'module' => $module,
                 'isView' => true,
+                'curriculums' => $curriculums,
+                'departments' => $departments,
             ]);
         } catch (Exception $e) {
             Log::error('Module show failed. ID: ' . $module->id . ' Error: ' . $e->getMessage());
@@ -159,10 +207,14 @@ class ModuleController extends Controller
     {
         try {
             $module->module_details = $this->getModuleDetailsText($module->module_details);
+            $curriculums = Curriculum::select('id', 'curriculum_name')->orderBy('curriculum_name')->get();
+            $departments = Department::where('dept_type', 'Departments')->select('id', 'dept_name')->orderBy('dept_name')->get();
 
             return Inertia::render('modules/module-form', [
                 'module' => $module,
                 'isEdit' => true,
+                'curriculums' => $curriculums,
+                'departments' => $departments,
             ]);
         } catch (Exception $e) {
             Log::error('Module edit form failed. ID: ' . $module->id . ' Error: ' . $e->getMessage());
@@ -185,6 +237,10 @@ class ModuleController extends Controller
                         'content' => $content,
                         'type' => 'text',
                     ]);
+                }
+
+                if (isset($validatedData['allowed_stream'])) {
+                    $validatedData['allowed_stream'] = $this->normalizeAllowedStream($validatedData['allowed_stream']);
                 }
 
                 $updated = $module->update($validatedData + [

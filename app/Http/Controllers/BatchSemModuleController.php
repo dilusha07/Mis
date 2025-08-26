@@ -7,6 +7,7 @@ use App\Models\Module;
 use App\Models\ModulePrerequisite;
 use App\Models\Employee;
 use App\Models\BatchStatus;
+use App\Models\Batch;
 use App\Http\Requests\BatchSemModuleFormRequest;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -81,16 +82,18 @@ class BatchSemModuleController extends Controller
      */
     public function create()
     {
-        $modules = Module::select('id', 'module_name', 'module_code')->get();
+        $batches = Batch::select('id', 'batch_name')->orderBy('batch_name')->get();
+        $modules = Module::select('id', 'module_name', 'module_code', 'module_type', 'allowed_stream')->get();
         $modulePrerequisites = ModulePrerequisite::with('module')->get();
-        $employees = Employee::select('id', 'full_name')->get();
-        $batchStatuses = BatchStatus::select('id', 'status')->get();
+        $lecturers = Employee::where('primary_role', 'lecture')->select('id', 'full_name')->orderBy('full_name')->get();
+        $batchStatusesAll = BatchStatus::select('id', 'batch_id', 'semester', 'status')->orderBy('batch_id')->get();
 
         return Inertia::render('batch-sem-modules/batch-sem-module-form', [
+            'batches' => $batches,
             'modules' => $modules,
             'modulePrerequisites' => $modulePrerequisites,
-            'employees' => $employees,
-            'batchStatuses' => $batchStatuses,
+            'lecturers' => $lecturers,
+            'batchStatusesAll' => $batchStatusesAll,
         ]);
     }
 
@@ -115,18 +118,20 @@ class BatchSemModuleController extends Controller
     public function show(BatchSemModule $batchSemModule)
     {
         $batchSemModule->load(['module', 'modulePrerequisite', 'moduleCoordinator', 'lecture', 'batchStatus']);
-        
-        $modules = Module::select('id', 'module_name', 'module_code')->get();
+
+        $batches = Batch::select('id', 'batch_name')->orderBy('batch_name')->get();
+        $modules = Module::select('id', 'module_name', 'module_code', 'module_type', 'allowed_stream')->get();
         $modulePrerequisites = ModulePrerequisite::with('module')->get();
-        $employees = Employee::select('id', 'full_name')->get();
-        $batchStatuses = BatchStatus::select('id', 'status')->get();
+        $lecturers = Employee::where('primary_role', 'lecture')->select('id', 'full_name')->orderBy('full_name')->get();
+        $batchStatusesAll = BatchStatus::select('id', 'batch_id', 'semester', 'status')->orderBy('batch_id')->get();
 
         return Inertia::render('batch-sem-modules/batch-sem-module-form', [
             'batchSemModule' => $batchSemModule,
+            'batches' => $batches,
             'modules' => $modules,
             'modulePrerequisites' => $modulePrerequisites,
-            'employees' => $employees,
-            'batchStatuses' => $batchStatuses,
+            'lecturers' => $lecturers,
+            'batchStatusesAll' => $batchStatusesAll,
             'isView' => true,
         ]);
     }
@@ -137,18 +142,20 @@ class BatchSemModuleController extends Controller
     public function edit(BatchSemModule $batchSemModule)
     {
         $batchSemModule->load(['module', 'modulePrerequisite', 'moduleCoordinator', 'lecture', 'batchStatus']);
-        
-        $modules = Module::select('id', 'module_name', 'module_code')->get();
+
+        $batches = Batch::select('id', 'batch_name')->orderBy('batch_name')->get();
+        $modules = Module::select('id', 'module_name', 'module_code', 'module_type', 'allowed_stream')->get();
         $modulePrerequisites = ModulePrerequisite::with('module')->get();
-        $employees = Employee::select('id', 'full_name')->get();
-        $batchStatuses = BatchStatus::select('id', 'status')->get();
+        $lecturers = Employee::where('primary_role', 'lecture')->select('id', 'full_name')->orderBy('full_name')->get();
+        $batchStatusesAll = BatchStatus::select('id', 'batch_id', 'semester', 'status')->orderBy('batch_id')->get();
 
         return Inertia::render('batch-sem-modules/batch-sem-module-form', [
             'batchSemModule' => $batchSemModule,
+            'batches' => $batches,
             'modules' => $modules,
             'modulePrerequisites' => $modulePrerequisites,
-            'employees' => $employees,
-            'batchStatuses' => $batchStatuses,
+            'lecturers' => $lecturers,
+            'batchStatusesAll' => $batchStatusesAll,
             'isEdit' => true,
         ]);
     }

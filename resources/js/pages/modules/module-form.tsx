@@ -6,12 +6,12 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import AppLayout from '@/layouts/app-layout';
 import { type BreadcrumbItem } from '@/types';
-import { Head, Link, useForm } from '@inertiajs/react';
+import { Head, Link, useForm, usePage } from '@inertiajs/react';
 import { ArrowLeft, LoaderCircle } from 'lucide-react';
 import React from 'react';
 
 export default function ModuleForm({ ...props }) {
-    const { module, isView, isEdit } = props as { module?: any; isView?: boolean; isEdit?: boolean };
+    const { module, isView, isEdit, curriculums = [], departments = [] } = props as { module?: any; isView?: boolean; isEdit?: boolean; curriculums?: { id: number; curriculum_name: string }[]; departments?: { id: number; dept_name: string }[] };
 
     const breadcrumbs: BreadcrumbItem[] = [
         {
@@ -25,6 +25,11 @@ export default function ModuleForm({ ...props }) {
         module_code: module?.module_code || '',
         module_details: module?.module_details || '',
         credits: module?.credits ?? 0,
+        semester: module?.semester || '',
+        module_type: module?.module_type || '',
+        allowed_stream: Array.isArray(module?.allowed_stream) ? module.allowed_stream.join(', ') : module?.allowed_stream || '',
+        curriculum_id: module?.curriculum_id ?? '',
+        department_id: module?.department_id ?? '',
         _method: isEdit ? 'PUT' : 'POST',
     });
 
@@ -41,6 +46,9 @@ export default function ModuleForm({ ...props }) {
             });
         }
     };
+
+    const semesterOptions = ['Semester 0','Semester 1','Semester 2','Semester 3','Semester 4','Semester 5','Semester 6','Semester 7','Semester 8','Semester 9'];
+    const moduleTypeOptions = ['Core','General Elective','Technical Elective','Common Core'];
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
@@ -125,8 +133,94 @@ export default function ModuleForm({ ...props }) {
                                     <InputError message={errors.credits} />
                                 </div>
 
+                                <div className="grid gap-2">
+                                    <Label htmlFor="semester">Semester</Label>
+                                    <select
+                                        id="semester"
+                                        name="semester"
+                                        value={data.semester}
+                                        onChange={(e) => setData('semester', e.target.value)}
+                                        disabled={isView || processing}
+                                        className="h-10 rounded-md border px-3"
+                                    >
+                                        <option value="">Select Semester</option>
+                                        {semesterOptions.map((opt) => (
+                                            <option key={opt} value={opt}>{opt}</option>
+                                        ))}
+                                    </select>
+                                    <InputError message={errors.semester as any} />
+                                </div>
+
+                                <div className="grid gap-2">
+                                    <Label htmlFor="module_type">Module Type</Label>
+                                    <select
+                                        id="module_type"
+                                        name="module_type"
+                                        value={data.module_type}
+                                        onChange={(e) => setData('module_type', e.target.value)}
+                                        disabled={isView || processing}
+                                        className="h-10 rounded-md border px-3"
+                                    >
+                                        <option value="">Select Type</option>
+                                        {moduleTypeOptions.map((opt) => (
+                                            <option key={opt} value={opt}>{opt}</option>
+                                        ))}
+                                    </select>
+                                    <InputError message={errors.module_type as any} />
+                                </div>
+
+                                <div className="grid gap-2">
+                                    <Label htmlFor="allowed_stream">Allowed Stream (comma separated)</Label>
+                                    <Input
+                                        value={data.allowed_stream}
+                                        onChange={(e) => setData('allowed_stream', e.target.value)}
+                                        id="allowed_stream"
+                                        name="allowed_stream"
+                                        type="text"
+                                        placeholder="e.g. CS, IT, SE"
+                                        disabled={isView || processing}
+                                    />
+                                    <InputError message={errors.allowed_stream as any} />
+                                </div>
+
+                                <div className="grid gap-2">
+                                    <Label htmlFor="curriculum_id">Curriculum</Label>
+                                    <select
+                                        id="curriculum_id"
+                                        name="curriculum_id"
+                                        value={data.curriculum_id}
+                                        onChange={(e) => setData('curriculum_id', Number(e.target.value))}
+                                        disabled={isView || processing}
+                                        className="h-10 rounded-md border px-3"
+                                    >
+                                        <option value="">Select Curriculum</option>
+                                        {curriculums.map((c) => (
+                                            <option key={c.id} value={c.id}>{c.curriculum_name}</option>
+                                        ))}
+                                    </select>
+                                    <InputError message={errors.curriculum_id as any} />
+                                </div>
+
+                                <div className="grid gap-2">
+                                    <Label htmlFor="department_id">Department</Label>
+                                    <select
+                                        id="department_id"
+                                        name="department_id"
+                                        value={data.department_id}
+                                        onChange={(e) => setData('department_id', Number(e.target.value))}
+                                        disabled={isView || processing}
+                                        className="h-10 rounded-md border px-3"
+                                    >
+                                        <option value="">Select Department</option>
+                                        {departments.map((d) => (
+                                            <option key={d.id} value={d.id}>{d.dept_name}</option>
+                                        ))}
+                                    </select>
+                                    <InputError message={errors.department_id as any} />
+                                </div>
+
                                 {!isView && (
-                                    <Button type="submit" className="mt-4 w-fit cursor-pointer" tabIndex={5} disabled={processing}>
+                                    <Button type="submit" className="mt-4 w-fit cursor-pointer" tabIndex={10} disabled={processing}>
                                         {processing && <LoaderCircle className="h-4 w-4 animate-spin" />}
                                         {processing ? (isEdit ? 'Updating... ' : 'Creating...') : isEdit ? 'Update' : 'Create'} Module
                                     </Button>
