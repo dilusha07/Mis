@@ -21,7 +21,10 @@ return new class extends Migration
                 'Semester 0', 'Semester 1', 'Semester 2', 'Semester 3', 'Semester 4',
                 'Semester 5', 'Semester 6', 'Semester 7', 'Semester 8', 'Semester 9'
             ])->comment('Current semester of the batch');
-            $table->unsignedInteger('semester_order')->comment('Order of semesters in the batch');
+            // JSON column to track semester history
+            $table->json('semester_order')
+                    ->nullable()
+                    ->comment('History of semester changes with changed_by and changed_at');
             $table->unsignedBigInteger('acc_year_id')->comment('Foreign key - reference to Academic year table');
             $table->tinyInteger('status')->default(1)->comment('0 = Finished, 1 = Active');
             $table->unsignedBigInteger('created_by')->comment('User ID who created this record');
