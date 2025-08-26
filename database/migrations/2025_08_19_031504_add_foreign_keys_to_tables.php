@@ -160,7 +160,6 @@ return new class extends Migration
         //  module_prerequisites
         Schema::table('module_prerequisites', function (Blueprint $table) {
             $table->foreign('module_id')->references('id')->on('modules');
-            $table->foreign('pre_module_id')->references('id')->on('modules');
             $table->foreign('curriculum_id')->references('id')->on('curriculums');
             $table->foreign('created_by')->references('user_id')->on('faculty_users');
             $table->foreign('modified_by')->references('user_id')->on('faculty_users');
@@ -204,7 +203,6 @@ return new class extends Migration
 
         Schema::table('module_prerequisites', function (Blueprint $table) {
             $table->dropForeign(['module_id']);
-            $table->dropForeign(['pre_module_id']);
             $table->dropForeign(['curriculum_id']);
             $table->dropForeign(['created_by']);
             $table->dropForeign(['modified_by']);
