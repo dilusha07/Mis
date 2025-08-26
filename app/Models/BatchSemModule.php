@@ -12,14 +12,12 @@ class BatchSemModule extends Model
 
     protected $fillable = [
         'module_id',
-        'module_prerequisites_id',
+        'prerequisites',
         'module_coordinator_id',
         'lecture_id',
         'batch_status_id',
-        'semester',
-        'module_type',
         'gpa_applicability',
-        'allowed_for',
+        'offering_type',
         'created_by',
         'modified_by',
     ];
@@ -27,6 +25,7 @@ class BatchSemModule extends Model
     protected $casts = [
         'created_at' => 'datetime',
         'updated_at' => 'datetime',
+        'prerequisites' => 'json', // This will automatically handle JSON serialization/deserialization
     ];
 
     /**
@@ -38,11 +37,19 @@ class BatchSemModule extends Model
     }
 
     /**
-     * Get the module prerequisite
+     * Get the prerequisites as an array
      */
-    public function modulePrerequisite(): BelongsTo
+    public function getPrerequisitesAttribute($value)
     {
-        return $this->belongsTo(ModulePrerequisite::class, 'module_prerequisites_id');
+        return json_decode($value ?? '[]', true);
+    }
+
+    /**
+     * Set the prerequisites as JSON
+     */
+    public function setPrerequisitesAttribute($value)
+    {
+        $this->attributes['prerequisites'] = is_array($value) ? json_encode($value) : $value;
     }
 
     /**

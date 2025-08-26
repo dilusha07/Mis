@@ -27,8 +27,7 @@ interface Prerequisite {
     id: number;
     module_name: string;
     module_code: string;
-    pre_module_name: string;
-    pre_module_code: string;
+    pre_modules: string;
     curriculum_name: string;
     created_at: string;
 }

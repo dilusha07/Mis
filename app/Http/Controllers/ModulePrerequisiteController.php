@@ -16,14 +16,11 @@ class ModulePrerequisiteController extends Controller
      */
     public function index(Request $request)
     {
-        $prerequisitesQuery = ModulePrerequisite::with(['module', 'prerequisiteModule', 'curriculum']);
+        $prerequisitesQuery = ModulePrerequisite::with(['module', 'curriculum']);
 
         if ($request->filled('search')) {
             $search = $request->string('search');
             $prerequisitesQuery->whereHas('module', function($q) use ($search) {
-                $q->where('module_name', 'like', "%{$search}%")
-                  ->orWhere('module_code', 'like', "%{$search}%");
-            })->orWhereHas('prerequisiteModule', function($q) use ($search) {
                 $q->where('module_name', 'like', "%{$search}%")
                   ->orWhere('module_code', 'like', "%{$search}%");
             });
@@ -34,15 +31,18 @@ class ModulePrerequisiteController extends Controller
         $perPage = (int) ($request->perPage ?? 10);
 
         if ($perPage === -1) {
-            $data = $prerequisitesQuery->latest()->get()->map(fn($p) => [
-                'id' => $p->id,
-                'module_name' => $p->module->module_name,
-                'module_code' => $p->module->module_code,
-                'pre_module_name' => $p->prerequisiteModule->module_name,
-                'pre_module_code' => $p->prerequisiteModule->module_code,
-                'curriculum_name' => $p->curriculum->curriculum_name,
-                'created_at' => $p->created_at?->format('d M Y'),
-            ]);
+            $data = $prerequisitesQuery->latest()->get()->map(function($p) {
+                $preModules = Module::whereIn('id', $p->pre_module_ids ?? [])->get(['module_name','module_code']);
+                $preModulesLabel = $preModules->map(fn($m) => $m->module_code.' - '.$m->module_name)->implode(', ');
+                return [
+                    'id' => $p->id,
+                    'module_name' => $p->module->module_name,
+                    'module_code' => $p->module->module_code,
+                    'pre_modules' => $preModulesLabel,
+                    'curriculum_name' => $p->curriculum->curriculum_name,
+                    'created_at' => $p->created_at?->format('d M Y'),
+                ];
+            });
 
             $prerequisites = [
                 'data' => $data,
@@ -54,15 +54,18 @@ class ModulePrerequisiteController extends Controller
             ];
         } else {
             $prerequisites = $prerequisitesQuery->latest()->paginate($perPage)->withQueryString();
-            $prerequisites->getCollection()->transform(fn($p) => [
-                'id' => $p->id,
-                'module_name' => $p->module->module_name,
-                'module_code' => $p->module->module_code,
-                'pre_module_name' => $p->prerequisiteModule->module_name,
-                'pre_module_code' => $p->prerequisiteModule->module_code,
-                'curriculum_name' => $p->curriculum->curriculum_name,
-                'created_at' => $p->created_at?->format('d M Y'),
-            ]);
+            $prerequisites->getCollection()->transform(function($p) {
+                $preModules = Module::whereIn('id', $p->pre_module_ids ?? [])->get(['module_name','module_code']);
+                $preModulesLabel = $preModules->map(fn($m) => $m->module_code.' - '.$m->module_name)->implode(', ');
+                return [
+                    'id' => $p->id,
+                    'module_name' => $p->module->module_name,
+                    'module_code' => $p->module->module_code,
+                    'pre_modules' => $preModulesLabel,
+                    'curriculum_name' => $p->curriculum->curriculum_name,
+                    'created_at' => $p->created_at?->format('d M Y'),
+                ];
+            });
         }
 
         return Inertia::render('prerequisites/index', [
@@ -107,10 +110,13 @@ class ModulePrerequisiteController extends Controller
      */
     public function show(ModulePrerequisite $prerequisite)
     {
-        $prerequisite->load(['module', 'prerequisiteModule', 'curriculum']);
+        $prerequisite->load(['module', 'curriculum']);
+        $preModules = Module::whereIn('id', $prerequisite->pre_module_ids ?? [])->get(['id','module_name','module_code']);
         
         return Inertia::render('prerequisites/prerequisite-form', [
-            'prerequisite' => $prerequisite,
+            'prerequisite' => array_merge($prerequisite->toArray(), [
+                'pre_module_ids' => $preModules->pluck('id'),
+            ]),
             'isView' => true,
             'modules' => Module::select('id', 'module_name', 'module_code')->get(),
             'curriculums' => Curriculum::select('id', 'curriculum_name')->get(),
@@ -122,10 +128,13 @@ class ModulePrerequisiteController extends Controller
      */
     public function edit(ModulePrerequisite $prerequisite)
     {
-        $prerequisite->load(['module', 'prerequisiteModule', 'curriculum']);
+        $prerequisite->load(['module', 'curriculum']);
+        $preModules = Module::whereIn('id', $prerequisite->pre_module_ids ?? [])->get(['id','module_name','module_code']);
         
         return Inertia::render('prerequisites/prerequisite-form', [
-            'prerequisite' => $prerequisite,
+            'prerequisite' => array_merge($prerequisite->toArray(), [
+                'pre_module_ids' => $preModules->pluck('id'),
+            ]),
             'isEdit' => true,
             'modules' => Module::select('id', 'module_name', 'module_code')->get(),
             'curriculums' => Curriculum::select('id', 'curriculum_name')->get(),

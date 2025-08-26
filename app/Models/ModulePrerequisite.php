@@ -12,7 +12,7 @@ class ModulePrerequisite extends Model
 
     protected $fillable = [
         'module_id',
-        'pre_module_id',
+        'pre_module_ids',
         'curriculum_id',
         'created_by',
         'modified_by',
@@ -21,6 +21,7 @@ class ModulePrerequisite extends Model
     protected $casts = [
         'created_at' => 'datetime',
         'updated_at' => 'datetime',
+        'pre_module_ids' => 'array',
     ];
 
     /**
@@ -31,13 +32,7 @@ class ModulePrerequisite extends Model
         return $this->belongsTo(Module::class, 'module_id');
     }
 
-    /**
-     * Get the prerequisite module
-     */
-    public function prerequisiteModule(): BelongsTo
-    {
-        return $this->belongsTo(Module::class, 'pre_module_id');
-    }
+    // Multiple prerequisite modules are stored as IDs in JSON.
 
     /**
      * Get the curriculum this prerequisite belongs to

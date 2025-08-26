@@ -4,6 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Checkbox } from '@/components/ui/checkbox';
 import AppLayout from '@/layouts/app-layout';
 import { type BreadcrumbItem } from '@/types';
 import { Head, Link, useForm } from '@inertiajs/react';
@@ -25,10 +26,9 @@ interface PrerequisiteFormProps {
     prerequisite?: {
         id: number;
         module_id: number;
-        pre_module_id: number;
+        pre_module_ids: number[];
         curriculum_id: number;
         module?: Module;
-        prerequisiteModule?: Module;
         curriculum?: Curriculum;
     };
     modules: Module[];
@@ -46,8 +46,8 @@ export default function PrerequisiteForm({ prerequisite, modules, curriculums, i
     ];
 
     const { data, setData, post, processing, errors, reset } = useForm({
-        module_id: prerequisite?.module_id || '',
-        pre_module_id: prerequisite?.pre_module_id || '',
+    module_id: prerequisite?.module_id || '',
+    pre_module_ids: Array.isArray(prerequisite?.pre_module_ids) ? prerequisite.pre_module_ids : [],
         curriculum_id: prerequisite?.curriculum_id || '',
         _method: isEdit ? 'PUT' : 'POST',
     });
@@ -110,24 +110,34 @@ export default function PrerequisiteForm({ prerequisite, modules, curriculums, i
                                 </div>
 
                                 <div className="grid gap-2">
-                                    <Label htmlFor="pre_module_id">Prerequisite Module</Label>
-                                    <Select
-                                        value={data.pre_module_id.toString()}
-                                        onValueChange={(value) => setData('pre_module_id', parseInt(value))}
-                                        disabled={isView || processing}
-                                    >
-                                        <SelectTrigger>
-                                            <SelectValue placeholder="Select a prerequisite module" />
-                                        </SelectTrigger>
-                                        <SelectContent>
-                                            {modules.map((module) => (
-                                                <SelectItem key={module.id} value={module.id.toString()}>
-                                                    {module.module_code} - {module.module_name}
-                                                </SelectItem>
-                                            ))}
-                                        </SelectContent>
-                                    </Select>
-                                    <InputError message={errors.pre_module_id} />
+                                    <Label>Prerequisite Modules</Label>
+                                    <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+                                        {modules
+                                            .filter((m) => m.id !== Number(data.module_id))
+                                            .map((module) => {
+                                                const checked = Array.isArray(data.pre_module_ids) && data.pre_module_ids.includes(module.id);
+                                                return (
+                                                    <label key={module.id} className="flex items-center gap-2">
+                                                        <Checkbox
+                                                            checked={checked}
+                                                            disabled={isView || processing}
+                                                            onCheckedChange={(val) => {
+                                                                const isChecked = Boolean(val);
+                                                                let current = Array.isArray(data.pre_module_ids) ? [...data.pre_module_ids] : [];
+                                                                if (isChecked) {
+                                                                    if (!current.includes(module.id)) current.push(module.id);
+                                                                } else {
+                                                                    current = current.filter((id) => id !== module.id);
+                                                                }
+                                                                setData('pre_module_ids', current);
+                                                            }}
+                                                        />
+                                                        <span>{module.module_code} - {module.module_name}</span>
+                                                    </label>
+                                                );
+                                            })}
+                                    </div>
+                                    <InputError message={(errors as any).pre_module_ids} />
                                 </div>
 
                                 <div className="grid gap-2">

@@ -19,7 +19,7 @@ class BatchSemModuleController extends Controller
      */
     public function index(Request $request)
     {
-        $batchSemModulesQuery = BatchSemModule::with(['module', 'modulePrerequisite', 'moduleCoordinator', 'lecture', 'batchStatus']);
+        $batchSemModulesQuery = BatchSemModule::with(['module', 'moduleCoordinator', 'lecture', 'batchStatus']);
 
         if ($request->filled('search')) {
             $search = $request->string('search');
@@ -36,13 +36,25 @@ class BatchSemModuleController extends Controller
         if ($perPage === -1) {
             $data = $batchSemModulesQuery->latest()->get()->map(fn($bsm) => [
                 'id' => $bsm->id,
-                'module_name' => $bsm->module?->module_name,
-                'module_code' => $bsm->module?->module_code,
-                'semester' => $bsm->semester,
-                'module_type' => $bsm->module_type,
+                'module' => [
+                    'id' => $bsm->module?->id,
+                    'module_name' => $bsm->module?->module_name,
+                    'module_code' => $bsm->module?->module_code,
+                ],
+                'module_coordinator' => [
+                    'id' => $bsm->moduleCoordinator?->id,
+                    'name' => $bsm->moduleCoordinator?->full_name ?? 'N/A'
+                ],
+                'lecture' => [
+                    'id' => $bsm->lecture?->id,
+                    'name' => $bsm->lecture?->full_name ?? 'N/A'
+                ],
+                'batch_status' => [
+                    'id' => $bsm->batchStatus?->id,
+                    'name' => $bsm->batchStatus?->status_name ?? 'N/A'
+                ],
                 'gpa_applicability' => $bsm->gpa_applicability,
-                'module_coordinator' => $bsm->moduleCoordinator?->full_name ?? 'N/A',
-                'lecture' => $bsm->lecture?->full_name ?? 'N/A',
+                'offering_type' => $bsm->offering_type,
                 'created_at' => $bsm->created_at?->format('d M Y'),
             ]);
 
@@ -58,13 +70,25 @@ class BatchSemModuleController extends Controller
             $batchSemModules = $batchSemModulesQuery->latest()->paginate($perPage)->withQueryString();
             $batchSemModules->getCollection()->transform(fn($bsm) => [
                 'id' => $bsm->id,
-                'module_name' => $bsm->module?->module_name,
-                'module_code' => $bsm->module?->module_code,
-                'semester' => $bsm->semester,
-                'module_type' => $bsm->module_type,
+                'module' => [
+                    'id' => $bsm->module?->id,
+                    'module_name' => $bsm->module?->module_name,
+                    'module_code' => $bsm->module?->module_code,
+                ],
+                'module_coordinator' => [
+                    'id' => $bsm->moduleCoordinator?->id,
+                    'name' => $bsm->moduleCoordinator?->full_name ?? 'N/A'
+                ],
+                'lecture' => [
+                    'id' => $bsm->lecture?->id,
+                    'name' => $bsm->lecture?->full_name ?? 'N/A'
+                ],
+                'batch_status' => [
+                    'id' => $bsm->batchStatus?->id,
+                    'name' => $bsm->batchStatus?->status_name ?? 'N/A'
+                ],
                 'gpa_applicability' => $bsm->gpa_applicability,
-                'module_coordinator' => $bsm->moduleCoordinator?->full_name ?? 'N/A',
-                'lecture' => $bsm->lecture?->full_name ?? 'N/A',
+                'offering_type' => $bsm->offering_type,
                 'created_at' => $bsm->created_at?->format('d M Y'),
             ]);
         }
@@ -102,8 +126,20 @@ class BatchSemModuleController extends Controller
      */
     public function store(BatchSemModuleFormRequest $request)
     {
-        $batchSemModule = BatchSemModule::create($request->validated() + [
-            'created_by' => auth()->id(),
+        $validatedData = $request->validated();
+
+        // Ensure prerequisites is an array
+        if (!isset($validatedData['prerequisites']) || !is_array($validatedData['prerequisites'])) {
+            $validatedData['prerequisites'] = [];
+        }
+
+        // Laravel will automatically JSON encode/decode this field based on the model cast
+
+        // Get the authenticated user ID
+        $userId = request()->user()->id ?? 1; // Default to 1 if no authenticated user
+
+        $batchSemModule = BatchSemModule::create($validatedData + [
+            'created_by' => $userId,
         ]);
 
         return redirect()->route('batch-sem-modules.index')->with(
@@ -117,7 +153,7 @@ class BatchSemModuleController extends Controller
      */
     public function show(BatchSemModule $batchSemModule)
     {
-        $batchSemModule->load(['module', 'modulePrerequisite', 'moduleCoordinator', 'lecture', 'batchStatus']);
+        $batchSemModule->load(['module', 'moduleCoordinator', 'lecture', 'batchStatus']);
 
         $batches = Batch::select('id', 'batch_name')->orderBy('batch_name')->get();
         $modules = Module::select('id', 'module_name', 'module_code', 'module_type', 'allowed_stream')->get();
@@ -141,7 +177,7 @@ class BatchSemModuleController extends Controller
      */
     public function edit(BatchSemModule $batchSemModule)
     {
-        $batchSemModule->load(['module', 'modulePrerequisite', 'moduleCoordinator', 'lecture', 'batchStatus']);
+        $batchSemModule->load(['module', 'moduleCoordinator', 'lecture', 'batchStatus']);
 
         $batches = Batch::select('id', 'batch_name')->orderBy('batch_name')->get();
         $modules = Module::select('id', 'module_name', 'module_code', 'module_type', 'allowed_stream')->get();
@@ -165,8 +201,20 @@ class BatchSemModuleController extends Controller
      */
     public function update(BatchSemModuleFormRequest $request, BatchSemModule $batchSemModule)
     {
-        $updated = $batchSemModule->update($request->validated() + [
-            'modified_by' => auth()->id(),
+        $validatedData = $request->validated();
+
+        // Ensure prerequisites is an array
+        if (!isset($validatedData['prerequisites']) || !is_array($validatedData['prerequisites'])) {
+            $validatedData['prerequisites'] = [];
+        }
+
+        // Laravel will automatically JSON encode/decode this field based on the model cast
+
+        // Get the authenticated user ID
+        $userId = request()->user()->id ?? 1; // Default to 1 if no authenticated user
+
+        $updated = $batchSemModule->update($validatedData + [
+            'modified_by' => $userId,
         ]);
 
         return redirect()->route('batch-sem-modules.index')->with(

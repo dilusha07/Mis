@@ -2,8 +2,7 @@ export const PrerequisiteTableConfig = {
     columns: [
         { label: 'Module Name', key: 'module_name', className: 'border p-4' },
         { label: 'Module Code', key: 'module_code', className: 'border p-4' },
-        { label: 'Prerequisite Module', key: 'pre_module_name', className: 'border p-4' },
-        { label: 'Prerequisite Code', key: 'pre_module_code', className: 'border p-4' },
+        { label: 'Prerequisites', key: 'pre_modules', className: 'border p-4' },
         { label: 'Curriculum', key: 'curriculum_name', className: 'border p-4' },
         { label: 'Created Date', key: 'created_at', className: 'border p-4' },
         { label: 'Actions', key: 'actions', isAction: true, className: 'border p-4' },

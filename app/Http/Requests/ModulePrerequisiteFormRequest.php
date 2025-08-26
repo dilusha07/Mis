@@ -22,19 +22,17 @@ class ModulePrerequisiteFormRequest extends FormRequest
      */
     public function rules(): array
     {
-        $prerequisiteId = $this->route('prerequisite')?->id;
-        
         return [
             'module_id' => [
                 'required',
                 'exists:modules,id',
-                Rule::unique('module_prerequisites')->where(function ($query) {
-                    return $query->where('pre_module_id', $this->pre_module_id)
-                                ->where('curriculum_id', $this->curriculum_id);
-                })->ignore($prerequisiteId),
             ],
-            'pre_module_id' => [
+            'pre_module_ids' => [
                 'required',
+                'array',
+            ],
+            'pre_module_ids.*' => [
+                'integer',
                 'exists:modules,id',
                 'different:module_id',
             ],
@@ -50,10 +48,10 @@ class ModulePrerequisiteFormRequest extends FormRequest
         return [
             'module_id.required' => 'Please select a module.',
             'module_id.exists' => 'The selected module does not exist.',
-            'module_id.unique' => 'This prerequisite relationship already exists.',
-            'pre_module_id.required' => 'Please select a prerequisite module.',
-            'pre_module_id.exists' => 'The selected prerequisite module does not exist.',
-            'pre_module_id.different' => 'A module cannot be a prerequisite for itself.',
+            'pre_module_ids.required' => 'Please select at least one prerequisite module.',
+            'pre_module_ids.array' => 'Prerequisites must be an array of module IDs.',
+            'pre_module_ids.*.exists' => 'One or more selected prerequisite modules do not exist.',
+            'pre_module_ids.*.different' => 'A module cannot be a prerequisite for itself.',
             'curriculum_id.required' => 'Please select a curriculum.',
             'curriculum_id.exists' => 'The selected curriculum does not exist.',
         ];
@@ -66,7 +64,7 @@ class ModulePrerequisiteFormRequest extends FormRequest
     {
         return [
             'module_id' => 'module',
-            'pre_module_id' => 'prerequisite module',
+            'pre_module_ids' => 'prerequisite modules',
             'curriculum_id' => 'curriculum',
         ];
     }
