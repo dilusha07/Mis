@@ -7,6 +7,7 @@ use App\Http\Controllers\AcademicYearController;
 use App\Http\Controllers\ModuleController;
 use App\Http\Controllers\BatchSemModuleController;
 use App\Http\Controllers\BatchController;
+use App\Http\Controllers\BatchStatusController;
 use App\Http\Controllers\ModulePrerequisiteController;
 use App\Http\Controllers\ExamAdmissionController;
 use App\Http\Controllers\AcademicAdvisorController;
@@ -29,6 +30,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::resource('academic-advisors', AcademicAdvisorController::class);
 
     Route::resource('batches', BatchController::class);
+
+    Route::resource('batch-statuses',BatchStatusController::class);
+  
 
 });
 

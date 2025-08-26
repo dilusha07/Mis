@@ -25,6 +25,7 @@ export default function AcademicYearForm({ ...props }) {
         year_end: academicYear?.year_end || "",
         status: academicYear?.status ?? 1,
         curriculum_id: academicYear?.curriculum_id || "",
+        curriculum_name: academicYear?.curriculum_name || "",
         _method: isEdit ? "PUT" : "POST",
     });
 
@@ -43,6 +44,8 @@ export default function AcademicYearForm({ ...props }) {
             });
         }
     };
+
+    const getStatusName = (status: number) => (status === 1 ? "Active" : "Inactive");
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
@@ -123,46 +126,52 @@ export default function AcademicYearForm({ ...props }) {
                                     <InputError message={errors.year_end} />
                                 </div>
 
-                                {/* Status */}
-                                <div className="grid gap-2">
-                                    <Label htmlFor="status">Status</Label>
-                                    <select
-                                        value={data.status}
-                                        onChange={(e) =>
-                                            setData("status", parseInt(e.target.value))
-                                        }
-                                        id="status"
-                                        disabled={isView || processing}
-                                        className="rounded border px-3 py-2"
-                                    >
-                                        <option value={1}>Active</option>
-                                        <option value={0}>Inactive</option>
-                                        <option value={2}>Old</option>
-                                    </select>
-                                    <InputError message={errors.status} />
-                                </div>
+                                 {/* Curriculum Dropdown */}
+                                    <div className="grid gap-2">
+                                        <Label htmlFor="curriculum_id">Curriculum</Label>
+                                        {isView ? (
+                                            <Input value={data.curriculum_name} disabled />
+                                        ) : (
+                                            <select
+                                                value={data.curriculum_id}
+                                                onChange={(e) => setData("curriculum_id", e.target.value)}
+                                                id="curriculum_id"
+                                                className="rounded border px-3 py-2"
+                                                disabled={processing}
+                                            >
+                                                <option value="">Select Curriculum</option>
+                                                {curriculums?.map((c: any) => (
+                                                    <option key={c.id} value={c.id}>
+                                                        {c.curriculum_name}
+                                                    </option>
+                                                ))}
+                                            </select>
+                                        )}
+                                        <InputError message={errors.curriculum_id} />
+                                    </div>
 
-                                {/* Curriculum Dropdown */}
-                                <div className="grid gap-2">
-                                    <Label htmlFor="curriculum_id">Curriculum</Label>
-                                    <select
-                                        value={data.curriculum_id}
-                                        onChange={(e) =>
-                                            setData("curriculum_id", e.target.value)
-                                        }
-                                        id="curriculum_id"
-                                        disabled={isView || processing}
-                                        className="rounded border px-3 py-2"
-                                    >
-                                        <option value="">Select Curriculum</option>
-                                        {curriculums?.map((c: any) => (
-                                            <option key={c.id} value={c.id}>
-                                                {c.curriculum_name}
-                                            </option>
-                                        ))}
-                                    </select>
-                                    <InputError message={errors.curriculum_id} />
-                                </div>
+
+                                {/* Status */}
+                                    <div className="grid gap-2">
+                                        <Label htmlFor="status">Status</Label>     
+                                        {isView ? (
+                                            <Input value={getStatusName(data.status)} disabled />
+                                        ) : (
+                                            <select
+                                                id="status"
+                                                value={data.status}
+                                                onChange={(e) => setData("status", parseInt(e.target.value))}
+                                                className="rounded border px-3 py-2"
+                                                disabled={processing}
+                                            >
+                                                <option value={1}>Active</option>
+                                                <option value={0}>Inactive</option>
+                                            </select>
+                                        )}
+                                        <InputError message={errors.status} />
+                                    </div>
+
+                               
 
                                 {/* Submit */}
                                 {!isView && (

@@ -1,20 +1,17 @@
-import { CustomTable } from '@/components/custom-table';
-import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Pagination } from '@/components/ui/pagination';
-import { ModuleTableConfig } from '@/config/tables/module-table';
-import AppLayout from '@/layouts/app-layout';
-import { type BreadcrumbItem } from '@/types';
-import { Head, Link, router, useForm, usePage } from '@inertiajs/react';
-import { CirclePlusIcon, X } from 'lucide-react';
-import { useEffect, useState } from 'react';
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import AppLayout from "@/layouts/app-layout";
+import { type BreadcrumbItem } from "@/types";
+import { Head, Link, router, useForm, usePage } from "@inertiajs/react";
+import { CirclePlusIcon, Search } from "lucide-react";
+import { useEffect, useState } from "react";
+import { Pagination } from "@/components/ui/pagination";
+import { CustomTable } from "@/components/custom-table";
+import { BatchStatusTableConfig } from "@/config/tables/batch-status-table";
 
 const breadcrumbs: BreadcrumbItem[] = [
-    {
-        title: 'Manage Modules',
-        href: '/modules',
-    },
+    { title: 'Manage Batch Statuses', href: '/batch-statuses' },
 ];
 
 interface LinkProps {
@@ -23,17 +20,18 @@ interface LinkProps {
     url: string;
 }
 
-interface Module {
+interface BatchStatus {
     id: number;
-    module_name: string;
-    module_code: string;
-    module_details: any; // Changed to any to handle JSON
-    credits: number;
+    batch: string;
+    academic_year: string;
+    degree_year: string;
+    semester: string;
+    status: number;
     created_at: string;
 }
 
-interface ModulePagination {
-    data: Module[];
+interface BatchStatusPagination {
+    data: BatchStatus[];
     links: LinkProps[];
     from: number;
     to: number;
@@ -46,16 +44,16 @@ interface FilterProps {
 }
 
 interface IndexProps {
-    modules: ModulePagination;
+    batchStatuses: BatchStatusPagination;
     filters: FilterProps;
     totalCount: number;
     filteredCount: number;
 }
 
-export default function Index({ modules, filters, totalCount, filteredCount }: IndexProps) {
+export default function Index({ batchStatuses, filters, totalCount, filteredCount }: IndexProps) {
     const { flash } = usePage<{ flash?: { success?: string; error?: string } }>().props;
     const flashMessage = flash?.success || flash?.error;
-    const [showAlert, setShowAlert] = useState(flash?.success || flash?.error ? true : false);
+    const [showAlert, setShowAlert] = useState(!!flashMessage);
 
     useEffect(() => {
         if (flashMessage) {
@@ -69,6 +67,7 @@ export default function Index({ modules, filters, totalCount, filteredCount }: I
         perPage: filters.perPage || '10',
     });
 
+    // Search handler
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const value = e.target.value;
         setData('search', value);
@@ -78,19 +77,24 @@ export default function Index({ modules, filters, totalCount, filteredCount }: I
             ...(data.perPage && { perPage: data.perPage }),
         };
 
-        router.get(route('modules.index'), queryString, {
+        router.get(route('batch-statuses.index'), queryString, {
             preserveState: true,
             preserveScroll: true,
         });
     };
 
+    // Reset filters
     const handleReset = () => {
         setData('search', '');
         setData('perPage', '10');
 
-        router.get(route('modules.index'), {}, { preserveState: true, preserveScroll: true });
+        router.get(route('batch-statuses.index'), {}, {
+            preserveState: true,
+            preserveScroll: true,
+        });
     };
 
+    // Per page change
     const handlePerPageChange = (value: string) => {
         setData('perPage', value);
 
@@ -99,90 +103,79 @@ export default function Index({ modules, filters, totalCount, filteredCount }: I
             ...(value && { perPage: value }),
         };
 
-        router.get(route('modules.index'), queryString, {
+        router.get(route('batch-statuses.index'), queryString, {
             preserveState: true,
             preserveScroll: true,
         });
     };
 
-    const handleDelete = (routeUrl: string) => {
-        router.delete(routeUrl, {
-            preserveScroll: true,
-        });
+    // Delete handler
+    const handleDelete = (routePath: string) => {
+            router.delete(routePath, { preserveScroll: true });
     };
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
-            <Head title="Module Management" />
+            <Head title="Batch Status Management" />
             <div className="flex h-full flex-1 flex-col gap-4 rounded-xl p-4">
+                {/* Flash Message */}
                 {showAlert && flashMessage && (
                     <Alert
                         variant={'default'}
                         className={`${flash?.success ? 'bg-green-800' : flash?.error ? 'bg-red-800' : ''} ml-auto max-w-md text-white`}
                     >
                         <AlertDescription className="text-white">
-                            {flash.success ? 'Success!' : 'Error!'} {''}
-                            {flashMessage}
+                            {flash.success ? 'Success!' : 'Error!'} {flashMessage}
                         </AlertDescription>
                     </Alert>
                 )}
 
+                {/* Search & Add button */}
                 <div className="mb-4 flex w-full items-center justify-between gap-4">
                     <Input
                         type="text"
                         value={data.search}
                         onChange={handleChange}
                         className="h-10 w-1/2"
-                        placeholder="Search Module..."
+                        placeholder="Search Batch Status..."
                         name="search"
                     />
-
                     <Button onClick={handleReset} className="h-10 cursor-pointer bg-red-600 hover:bg-red-500">
-                        <X size={20} />
+                        <Search size={20} />
                     </Button>
-
                     <div className="ml-auto">
                         <Link
                             className="text-md flex cursor-pointer items-center rounded-lg bg-indigo-800 px-4 py-2 text-white hover:opacity-90"
                             as="button"
-                            href={route('modules.create')}
+                            href={route('batch-statuses.create')}
                         >
-                            <CirclePlusIcon className="me-2" /> Add Module
+                            <CirclePlusIcon className="me-2" /> Add Batch Status
                         </Link>
                     </div>
                 </div>
 
+                {/* Custom Table */}
                 <CustomTable
-                    columns={ModuleTableConfig.columns}
-                    actions={ModuleTableConfig.actions}
-                    data={modules.data}
-                    from={modules.from}
+                    columns={BatchStatusTableConfig.columns}
+                    actions={BatchStatusTableConfig.actions}
+                    data={batchStatuses.data}
+                    from={batchStatuses.from - 1}
+                    isModal={false}
                     onDelete={handleDelete}
-                    onView={() => {}}
-                    onEdit={() => {}}
+                    onView={(row) => router.get(route('batch-statuses.show', row.id))}
+                    onEdit={(row) => router.get(route('batch-statuses.edit', row.id))}
                 />
 
+                {/* Pagination */}
                 <Pagination
-                    products={modules}
+                    products={batchStatuses}
                     perPage={data.perPage}
                     onPerPageChange={handlePerPageChange}
                     totalCount={totalCount}
                     filteredCount={filteredCount}
                     search={data.search}
                 />
-
-                {/* Delete Confirmation Modal */}
-                {/* <DeleteConfirmationModal
-                    isOpen={deleteModal.isOpen}
-                    onClose={closeDeleteModal}
-                    onConfirm={() => handleDelete(deleteModal.deleteRoute)}
-                    title="Delete Module"
-                    message="Are you sure you want to delete this module"
-                    itemName={deleteModal.moduleName}
-                /> */}
             </div>
         </AppLayout>
     );
 }
-
-

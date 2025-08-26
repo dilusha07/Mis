@@ -22,16 +22,11 @@ class BatchController extends Controller
                          ->orWhereHas('curriculum', fn($q) => $q->where('curriculum_name', 'like', "%{$search}%"));
         }
 
-        $batches = $batchesQuery->latest()->paginate($request->perPage ?? 10)->withQueryString();
+        $perPage = (int) ($request->perPage ?? 10);
 
-        $batches->getCollection()->transform(fn($batch) => [
-            'id'             => $batch->id,
-            'batch_name'     => $batch->batch_name,
-            'curriculum'     => $batch->curriculum->curriculum_name,
-            'start_date'     => $batch->start_date->format('d M Y'),
-            'effective_date' => $batch->effective_date?->format('d M Y'),
-            'created_at'     => $batch->created_at->format('d M Y'),
-        ]);
+        $batches = $batchesQuery->latest()->paginate($perPage)->withQueryString();
+
+        $batches->getCollection()->transform(fn($batch) => $this->format($batch));
 
         return Inertia::render('batches/index', [
             'batches' => $batches,
@@ -56,21 +51,24 @@ class BatchController extends Controller
         }
     }
 
-   public function show(Batch $batch)
-{
-    $curriculums = Curriculum::select('id', 'curriculum_name')->get();
-
-    return Inertia::render('batches/batch-form', [
-        'batch' => $batch->load('curriculum'),
-        'curriculums' => $curriculums,         
-        'isView' => true,
-    ]);
-}
+    public function show(Batch $batch)
+    {
+        $curriculums = Curriculum::select('id', 'curriculum_name')->get();
+        return Inertia::render('batches/batch-form', [
+            'batch' => $this->formatForForm($batch),
+            'curriculums' => $curriculums,
+            'isView' => true,
+        ]);
+    }
 
     public function edit(Batch $batch)
     {
         $curriculums = Curriculum::select('id', 'curriculum_name')->get();
-        return Inertia::render('batches/batch-form', ['batch' => $batch, 'curriculums' => $curriculums, 'isEdit' => true]);
+        return Inertia::render('batches/batch-form', [
+            'batch' => $this->formatForForm($batch),
+            'curriculums' => $curriculums,
+            'isEdit' => true,
+        ]);
     }
 
     public function update(BatchFormRequest $request, Batch $batch)
@@ -93,5 +91,35 @@ class BatchController extends Controller
             Log::error('Batch deletion failed: ' . $e->getMessage());
             return redirect()->back()->with('error', 'Unable to delete batch.');
         }
+    }
+
+    /**
+     * Format batch for index table
+     */
+    private function format($batch)
+    {
+        return [
+            'id'             => $batch->id,
+            'batch_name'     => $batch->batch_name,
+            'curriculum'     => $batch->curriculum?->curriculum_name,
+            'start_date'     => $batch->start_date->format('d M Y'),
+            'effective_date' => $batch->effective_date?->format('d M Y'),
+            'created_at'     => $batch->created_at->format('d M Y'),
+        ];
+    }
+
+    /**
+     * Format batch for form (edit/view)
+     */
+    private function formatForForm(Batch $batch)
+    {
+        return [
+            'id'             => $batch->id,
+            'batch_name'     => $batch->batch_name,
+            'curriculum_id'  => $batch->curriculum_id,
+            'start_date'     => $batch->start_date?->format('Y-m-d'),
+            'effective_date' => $batch->effective_date?->format('Y-m-d'),
+            'status'         => $batch->status,
+        ];
     }
 }
