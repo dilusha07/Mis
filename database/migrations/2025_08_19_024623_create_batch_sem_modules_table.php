@@ -14,7 +14,8 @@ return new class extends Migration
         Schema::create('batch_sem_modules', function (Blueprint $table) {
             $table->bigIncrements('id')->comment('Primary key - Batch semester module record ID');
             $table->unsignedBigInteger('module_id')->comment('Foreign key - Reference to of the module table');
-            //$table->json('module_prerequisites_id')->comment('Foreign key - Reference to of the module_prerequisites table');
+             // JSON column to store selected prerequisite module IDs specific to this batch-semester offering
+            $table->json('prerequisites')->nullable()->comment('Batch-specific prerequisite module IDs');
             $table->unsignedBigInteger('module_coordinator_id')->comment('Foreign key - Reference to the employee table (primary role-lecture)');
             $table->unsignedBigInteger('lecture_id')->comment('Foreign key - Reference to the employee table (primary role - lecture)');
             $table->unsignedBigInteger('batch_status_id')->comment('Foreign key - Reference to of the batch_status table');

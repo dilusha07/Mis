@@ -13,8 +13,9 @@ return new class extends Migration
     {
         Schema::create('module_prerequisites', function (Blueprint $table) {
             $table->bigIncrements('id')->comment('Primary key - Module prerequisite record ID');
-            $table->unsignedBigInteger('module_id')->index()->comment('Foreign key - Reference to module table');
-            $table->unsignedBigInteger('pre_module_id')->index()->comment('Foreign key - Reference to prerequisite_module table');
+            $table->unsignedBigInteger('module_id')->index()->comment('Foreign key - Reference to modules table');
+            // Store prerequisite module IDs as a JSON array 
+            $table->json('pre_module_ids')->nullable()->comment('List of prerequisite module IDs for this module');
             $table->unsignedBigInteger('curriculum_id')->comment('Foreign key - Reference to curriculum table');
             $table->unsignedBigInteger('created_by')->comment('User ID who created this record');
             $table->unsignedBigInteger('modified_by')->nullable()->comment('User ID who last modified this record');
