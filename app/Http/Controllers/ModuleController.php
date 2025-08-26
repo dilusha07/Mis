@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\module;
+use App\Models\Module;
 use App\Http\Requests\ModuleFormRequest;
 use Exception;
 use Illuminate\Http\Request;
@@ -12,12 +12,25 @@ use Inertia\Inertia;
 class ModuleController extends Controller
 {
     /**
+     * Convert stored JSON string to plain text for display.
+     */
+    private function getModuleDetailsText($moduleDetails)
+    {
+        if (!$moduleDetails) return '';
+        if (is_string($moduleDetails)) {
+            $decoded = json_decode($moduleDetails, true);
+            return is_array($decoded) && isset($decoded['content']) ? (string) $decoded['content'] : (string) $moduleDetails;
+        }
+        return '';
+    }
+
+    /**
      * Display a listing of the resource.
      */
     public function index(Request $request)
     {
         try {
-            $modulesQuery = module::query();
+            $modulesQuery = Module::query();
 
             if ($request->filled('search')) {
                 $search = $request->string('search');
@@ -27,7 +40,7 @@ class ModuleController extends Controller
                 );
             }
 
-            $totalCount = module::count();
+            $totalCount = Module::count();
             $filteredCount = (clone $modulesQuery)->count();
             $perPage = (int) ($request->perPage ?? 10);
 
@@ -36,7 +49,7 @@ class ModuleController extends Controller
                     'id' => $m->id,
                     'module_name' => $m->module_name,
                     'module_code' => $m->module_code,
-                    'module_details' => $m->module_details,
+                    'module_details' => $this->getModuleDetailsText($m->module_details),
                     'credits' => $m->credits,
                     'created_at' => $m->created_at?->format('d M Y'),
                 ]);
@@ -55,7 +68,7 @@ class ModuleController extends Controller
                     'id' => $m->id,
                     'module_name' => $m->module_name,
                     'module_code' => $m->module_code,
-                    'module_details' => $m->module_details,
+                    'module_details' => $this->getModuleDetailsText($m->module_details),
                     'credits' => $m->credits,
                     'created_at' => $m->created_at?->format('d M Y'),
                 ]);
@@ -93,7 +106,17 @@ class ModuleController extends Controller
     public function store(ModuleFormRequest $request)
     {
         try {
-            $module = module::create($request->validated() + [
+            $validatedData = $request->validated();
+
+            if (isset($validatedData['module_details'])) {
+                $content = trim((string) $validatedData['module_details']);
+                $validatedData['module_details'] = json_encode([
+                    'content' => $content,
+                    'type' => 'text',
+                ]);
+            }
+
+            $module = Module::create($validatedData + [
                 'created_by' => auth()->id(),
             ]);
 
@@ -114,9 +137,11 @@ class ModuleController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(module $module)
+    public function show(Module $module)
     {
         try {
+            $module->module_details = $this->getModuleDetailsText($module->module_details);
+
             return Inertia::render('modules/module-form', [
                 'module' => $module,
                 'isView' => true,
@@ -130,9 +155,11 @@ class ModuleController extends Controller
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(module $module)
+    public function edit(Module $module)
     {
         try {
+            $module->module_details = $this->getModuleDetailsText($module->module_details);
+
             return Inertia::render('modules/module-form', [
                 'module' => $module,
                 'isEdit' => true,
@@ -146,11 +173,21 @@ class ModuleController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(ModuleFormRequest $request, module $module)
+    public function update(ModuleFormRequest $request, Module $module)
     {
         try {
             if ($module) {
-                $updated = $module->update($request->validated() + [
+                $validatedData = $request->validated();
+
+                if (isset($validatedData['module_details'])) {
+                    $content = trim((string) $validatedData['module_details']);
+                    $validatedData['module_details'] = json_encode([
+                        'content' => $content,
+                        'type' => 'text',
+                    ]);
+                }
+
+                $updated = $module->update($validatedData + [
                     'modified_by' => auth()->id(),
                 ]);
 
@@ -173,9 +210,9 @@ class ModuleController extends Controller
     }
 
     /**
-     * Remove the specified resource from storage.
+     * Remove the specified resource in storage.
      */
-    public function destroy(module $module)
+    public function destroy(Module $module)
     {
         try {
             if ($module) {

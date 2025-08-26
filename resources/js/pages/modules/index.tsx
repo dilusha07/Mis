@@ -27,7 +27,7 @@ interface Module {
     id: number;
     module_name: string;
     module_code: string;
-    module_details: string;
+    module_details: any; // Changed to any to handle JSON
     credits: number;
     created_at: string;
 }

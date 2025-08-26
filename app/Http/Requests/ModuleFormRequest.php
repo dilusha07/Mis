@@ -23,7 +23,7 @@ class ModuleFormRequest extends FormRequest
         return [
             'module_name'    => 'required|string|max:255',
             'module_code'    => 'required|string|max:100',
-            'module_details' => 'nullable|string',
+            'module_details' => 'nullable|string|max:1000',
             'credits'        => 'required|integer|min:0',
         ];
     }

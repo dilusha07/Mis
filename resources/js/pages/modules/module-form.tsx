@@ -107,7 +107,7 @@ export default function ModuleForm({ ...props }) {
                                         rows={3}
                                         disabled={isView || processing}
                                     />
-                                        <InputError message={errors.module_details} />
+                                    <InputError message={errors.module_details} />
                                 </div>
 
                                 <div className="grid gap-2">
