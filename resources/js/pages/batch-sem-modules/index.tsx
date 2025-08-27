@@ -194,6 +194,7 @@ export default function Index({ batchSemModules, filters, totalCount, filteredCo
                     onEdit={() => {}}
                 />
 
+                {/*
                 <Pagination
                     products={batchSemModules}
                     perPage={data.perPage}
@@ -202,6 +203,7 @@ export default function Index({ batchSemModules, filters, totalCount, filteredCo
                     filteredCount={filteredCount}
                     search={data.search}
                 />
+                */}
             </div>
         </AppLayout>
     );
