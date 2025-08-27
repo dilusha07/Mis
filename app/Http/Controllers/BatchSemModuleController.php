@@ -51,7 +51,8 @@ class BatchSemModuleController extends Controller
                 ],
                 'batch_status' => [
                     'id' => $bsm->batchStatus?->id,
-                    'name' => $bsm->batchStatus?->status_name ?? 'N/A'
+                    'name' => $bsm->batchStatus?->semester ?? 'N/A',
+                    'batch_name' => $bsm->batchStatus?->batch?->batch_name ?? 'N/A'
                 ],
                 'gpa_applicability' => $bsm->gpa_applicability,
                 'offering_type' => $bsm->offering_type,
@@ -85,7 +86,8 @@ class BatchSemModuleController extends Controller
                 ],
                 'batch_status' => [
                     'id' => $bsm->batchStatus?->id,
-                    'name' => $bsm->batchStatus?->status_name ?? 'N/A'
+                    'name' => $bsm->batchStatus?->semester ?? 'N/A',
+                    'batch_name' => $bsm->batchStatus?->batch?->batch_name ?? 'N/A'
                 ],
                 'gpa_applicability' => $bsm->gpa_applicability,
                 'offering_type' => $bsm->offering_type,
@@ -107,8 +109,16 @@ class BatchSemModuleController extends Controller
     public function create()
     {
         $batches = Batch::select('id', 'batch_name')->orderBy('batch_name')->get();
-        $modules = Module::select('id', 'module_name', 'module_code', 'module_type', 'allowed_stream')->get();
+
+        // Get modules with department information
+        $modules = Module::select('id', 'module_name', 'module_code', 'module_type', 'allowed_stream', 'department_id')->get();
+
+        // Get all module prerequisites with their relations
         $modulePrerequisites = ModulePrerequisite::with('module')->get();
+
+        // Get departments for better organization
+        $departments = \App\Models\Department::select('id', 'dept_name', 'dept_code')->get();
+
         $lecturers = Employee::where('primary_role', 'lecture')->select('id', 'full_name')->orderBy('full_name')->get();
         $batchStatusesAll = BatchStatus::select('id', 'batch_id', 'semester', 'status')->orderBy('batch_id')->get();
 
@@ -118,6 +128,7 @@ class BatchSemModuleController extends Controller
             'modulePrerequisites' => $modulePrerequisites,
             'lecturers' => $lecturers,
             'batchStatusesAll' => $batchStatusesAll,
+            'departments' => $departments,
         ]);
     }
 
@@ -156,8 +167,9 @@ class BatchSemModuleController extends Controller
         $batchSemModule->load(['module', 'moduleCoordinator', 'lecture', 'batchStatus']);
 
         $batches = Batch::select('id', 'batch_name')->orderBy('batch_name')->get();
-        $modules = Module::select('id', 'module_name', 'module_code', 'module_type', 'allowed_stream')->get();
+        $modules = Module::select('id', 'module_name', 'module_code', 'module_type', 'allowed_stream', 'department_id')->get();
         $modulePrerequisites = ModulePrerequisite::with('module')->get();
+        $departments = \App\Models\Department::select('id', 'dept_name', 'dept_code')->get();
         $lecturers = Employee::where('primary_role', 'lecture')->select('id', 'full_name')->orderBy('full_name')->get();
         $batchStatusesAll = BatchStatus::select('id', 'batch_id', 'semester', 'status')->orderBy('batch_id')->get();
 
@@ -168,6 +180,7 @@ class BatchSemModuleController extends Controller
             'modulePrerequisites' => $modulePrerequisites,
             'lecturers' => $lecturers,
             'batchStatusesAll' => $batchStatusesAll,
+            'departments' => $departments,
             'isView' => true,
         ]);
     }
@@ -180,8 +193,9 @@ class BatchSemModuleController extends Controller
         $batchSemModule->load(['module', 'moduleCoordinator', 'lecture', 'batchStatus']);
 
         $batches = Batch::select('id', 'batch_name')->orderBy('batch_name')->get();
-        $modules = Module::select('id', 'module_name', 'module_code', 'module_type', 'allowed_stream')->get();
+        $modules = Module::select('id', 'module_name', 'module_code', 'module_type', 'allowed_stream', 'department_id')->get();
         $modulePrerequisites = ModulePrerequisite::with('module')->get();
+        $departments = \App\Models\Department::select('id', 'dept_name', 'dept_code')->get();
         $lecturers = Employee::where('primary_role', 'lecture')->select('id', 'full_name')->orderBy('full_name')->get();
         $batchStatusesAll = BatchStatus::select('id', 'batch_id', 'semester', 'status')->orderBy('batch_id')->get();
 
@@ -192,6 +206,7 @@ class BatchSemModuleController extends Controller
             'modulePrerequisites' => $modulePrerequisites,
             'lecturers' => $lecturers,
             'batchStatusesAll' => $batchStatusesAll,
+            'departments' => $departments,
             'isEdit' => true,
         ]);
     }
