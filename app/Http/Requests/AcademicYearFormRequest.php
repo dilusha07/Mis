@@ -22,7 +22,7 @@ class AcademicYearFormRequest extends FormRequest
     public function rules(): array
     {
         return [
-        'academic_year' => 'required|string|max:191|unique:academic_years,academic_year,' ,
+        'academic_year' => 'required|string' ,
         'year_begin'    => 'required|date',
         'year_end'      => 'required|date|after:year_begin',
         'status'        => 'required|in:0,1,2',
@@ -39,7 +39,7 @@ class AcademicYearFormRequest extends FormRequest
     {
          return [
             'academic_year.required' => 'Please enter the academic year (e.g., 2024-2025).',
-            'academic_year.unique'   => 'This academic year already exists.',
+            //'academic_year.unique'   => 'This academic year already exists.',
 
             'year_begin.required'    => 'Please select the starting date.',
             'year_end.required'      => 'Please select the ending date.',
