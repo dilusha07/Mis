@@ -1,13 +1,10 @@
 import { CustomTable } from '@/components/custom-table';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Pagination } from '@/components/ui/pagination';
 import { BatchSemModuleTableConfig } from '@/config/tables/batch-sem-module-table';
 import AppLayout from '@/layouts/app-layout';
 import { type BreadcrumbItem } from '@/types';
 import { Head, Link, router, useForm, usePage } from '@inertiajs/react';
-import { CirclePlusIcon, X } from 'lucide-react';
+import { CirclePlusIcon } from 'lucide-react';
 import { useEffect, useState } from 'react';
 
 const breadcrumbs: BreadcrumbItem[] = [
@@ -16,12 +13,6 @@ const breadcrumbs: BreadcrumbItem[] = [
         href: '/batch-sem-modules',
     },
 ];
-
-interface LinkProps {
-    active: boolean;
-    label: string;
-    url: string;
-}
 
 interface Module {
     id: number;
@@ -55,27 +46,18 @@ interface BatchSemModule {
 
 interface BatchSemModulePagination {
     data: BatchSemModule[];
-    links: LinkProps[];
     from: number;
-    to: number;
-    total: number;
-}
-
-interface FilterProps {
-    search: string;
-    perPage: string;
 }
 
 interface IndexProps {
     batchSemModules: BatchSemModulePagination;
-    filters: FilterProps;
-    totalCount: number;
-    filteredCount: number;
+    batches: Array<{ id: number; batch_name: string }>;
+    departments: Array<{ id: number; dept_name: string; dept_code: string }>;
 }
 
 // Using BatchSemModuleTableConfig for columns and actions
 
-export default function Index({ batchSemModules, filters, totalCount, filteredCount }: IndexProps) {
+export default function Index({ batchSemModules, batches, departments }: IndexProps) {
     const { flash } = usePage<{ flash?: { success?: string; error?: string } }>().props;
     const flashMessage = flash?.success || flash?.error;
     const [showAlert, setShowAlert] = useState(flash?.success || flash?.error ? true : false);
@@ -88,44 +70,16 @@ export default function Index({ batchSemModules, filters, totalCount, filteredCo
     }, [flashMessage]);
 
     const { data, setData } = useForm({
-        search: filters?.search || '',
-        perPage: filters?.perPage || '10',
+        selectedBatch: '',
+        selectedDepartment: '',
     });
 
-    const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const value = e.target.value;
-        setData('search', value);
 
-        const queryString = {
-            ...(value && { search: value }),
-            ...(data.perPage && { perPage: data.perPage }),
-        };
-
-        router.get(route('batch-sem-modules.index'), queryString, {
-            preserveState: true,
-            preserveScroll: true,
-        });
-    };
 
     const handleReset = () => {
-        setData('search', '');
-        setData('perPage', '10');
-
+        setData('selectedBatch', '');
+        setData('selectedDepartment', '');
         router.get(route('batch-sem-modules.index'), {}, { preserveState: true, preserveScroll: true });
-    };
-
-    const handlePerPageChange = (value: string) => {
-        setData('perPage', value);
-
-        const queryString = {
-            ...(data.search && { search: data.search }),
-            ...(value && { perPage: value }),
-        };
-
-        router.get(route('batch-sem-modules.index'), queryString, {
-            preserveState: true,
-            preserveScroll: true,
-        });
     };
 
     const handleDelete = (routeUrl: string) => {
@@ -151,18 +105,64 @@ export default function Index({ batchSemModules, filters, totalCount, filteredCo
                 )}
 
                 <div className="mb-4 flex w-full items-center justify-between gap-4">
-                    <Input
-                        type="text"
-                        value={data.search}
-                        onChange={handleChange}
-                        className="h-10 w-1/2"
-                        placeholder="Search Batch Semester Module..."
-                        name="search"
-                    />
+                    <div className="flex gap-4 w-full">
+                        <select
+                            value={data.selectedBatch}
+                            onChange={(e) => {
+                                setData('selectedBatch', e.target.value);
+                                const queryString = {
+                                    selectedBatch: e.target.value,
+                                    ...(data.selectedDepartment && { selectedDepartment: data.selectedDepartment }),
+                                };
+                                router.get(route('batch-sem-modules.index'), queryString, {
+                                    preserveState: true,
+                                    preserveScroll: true,
+                                });
+                            }}
+                            className="h-10 rounded-md border border-input bg-background px-3 py-2"
+                        >
+                            <option value="">Select Batch</option>
+                            {batches.map((batch) => (
+                                <option key={batch.id} value={batch.id}>
+                                    {batch.batch_name}
+                                </option>
+                            ))}
+                        </select>
 
-                    <Button onClick={handleReset} className="h-10 cursor-pointer bg-red-600 hover:bg-red-500">
-                        <X size={20} />
-                    </Button>
+                        <select
+                            value={data.selectedDepartment}
+                            onChange={(e) => {
+                                setData('selectedDepartment', e.target.value);
+                                const queryString = {
+                                    ...(data.selectedBatch && { selectedBatch: data.selectedBatch }),
+                                    selectedDepartment: e.target.value,
+                                };
+                                router.get(route('batch-sem-modules.index'), queryString, {
+                                    preserveState: true,
+                                    preserveScroll: true,
+                                });
+                            }}
+                            className="h-10 rounded-md border border-input bg-background px-3 py-2"
+                        >
+                            <option value="">Select Department</option>
+                            {departments.map((department) => (
+                                <option key={department.id} value={department.id}>
+                                    {department.dept_name}
+                                </option>
+                            ))}
+                        </select>
+
+                        {/* Search functionality commented for future use
+                        <Input
+                            type="text"
+                            value={data.search}
+                            onChange={handleChange}
+                            className="h-10 w-1/2"
+                            placeholder="Search Batch Semester Module..."
+                            name="search"
+                        />
+                        */}
+                    </div>
 
                     <div className="ml-auto">
                         <Link
@@ -175,24 +175,54 @@ export default function Index({ batchSemModules, filters, totalCount, filteredCo
                     </div>
                 </div>
 
-                <CustomTable
-                    columns={BatchSemModuleTableConfig.columns}
-                    actions={BatchSemModuleTableConfig.actions}
-                    data={batchSemModules.data.map(item => ({
-                        ...item,
-                        module_name: `${item.module?.module_code || ''} - ${item.module?.module_name || 'Unknown Module'}`,
-                        module_code: item.module?.module_code || 'N/A',
-                        semester: item.batch_status?.name || 'N/A',
-                        module_type: item.offering_type || 'N/A',
-                        gpa_applicability: item.gpa_applicability || 'N/A',
-                        module_coordinator: item.module_coordinator?.name || 'Not Assigned',
-                        lecture: item.lecture?.name || 'Not Assigned'
-                    }))}
-                    from={batchSemModules.from}
-                    onDelete={handleDelete}
-                    onView={() => {}}
-                    onEdit={() => {}}
-                />
+                {data.selectedBatch && data.selectedDepartment ? (
+                    <>
+                        <div className="bg-white p-4 rounded-lg shadow mb-4">
+                            <h2 className="text-xl font-semibold mb-2">
+                                Batch Semester Module Details
+                            </h2>
+                            <div className="text-sm text-gray-600 space-y-1">
+                                <p>
+                                    <span className="font-medium">Batch:</span>{' '}
+                                    {batches.find(b => b.id.toString() === data.selectedBatch)?.batch_name}
+                                </p>
+                                <p>
+                                    <span className="font-medium">Department:</span>{' '}
+                                    {departments.find(d => d.id.toString() === data.selectedDepartment)?.dept_name}
+                                </p>
+                                <p>
+                                    <span className="font-medium">Total Modules:</span>{' '}
+                                    {batchSemModules.data.length}
+                                </p>
+                            </div>
+                        </div>
+                        <CustomTable
+                            columns={BatchSemModuleTableConfig.columns}
+                            actions={BatchSemModuleTableConfig.actions}
+                            data={batchSemModules.data.map(item => ({
+                                ...item,
+                                module_name: `${item.module?.module_code || ''} - ${item.module?.module_name || 'Unknown Module'}`,
+                                module_code: item.module?.module_code || 'N/A',
+                                semester: item.batch_status?.name || 'N/A',
+                                module_type: item.offering_type || 'N/A',
+                                gpa_applicability: item.gpa_applicability || 'N/A',
+                                module_coordinator: item.module_coordinator?.name || 'Not Assigned',
+                                lecture: item.lecture?.name || 'Not Assigned'
+                            }))}
+                            from={batchSemModules.from}
+                            onDelete={handleDelete}
+                            onView={() => {}}
+                            onEdit={() => {}}
+                        />
+                    </>
+                ) : (
+                    <div className="flex flex-col items-center justify-center p-8 bg-gray-50 rounded-lg">
+                        <div className="text-center">
+                            <h3 className="text-lg font-semibold text-gray-700 mb-2">No Data to Display</h3>
+                            <p className="text-gray-500">Please select both Batch and Department to view the module details.</p>
+                        </div>
+                    </div>
+                )}
 
                 {/*
                 <Pagination
