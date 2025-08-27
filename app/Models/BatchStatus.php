@@ -49,7 +49,7 @@ class BatchStatus extends Model
     // Accessor for readable status
     public function getStatusTextAttribute()
     {
-        return $this->status == 1 ? 'Active' : 'Passing Out';
+        return $this->status == 1 ? 'Active' : 'Out';
     }
 
      public function getBatchNameAttribute()
