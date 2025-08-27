@@ -59,7 +59,7 @@ export default function BatchStatusForm({ ...props }) {
     batches.find((b: any) => b.id == id)?.batch_name || "";
   const getAcademicYearName = (id: string | number) =>
     academicYears.find((y: any) => y.id == id)?.academic_year || "";
-  const getStatusName = (status: any) => (status == 1 ? "Active" : "Passing Out");
+  const getStatusName = (status: any) => (status == 1 ? "Active" : "Out");
 
   return (
     <AppLayout breadcrumbs={breadcrumbs}>
@@ -194,7 +194,7 @@ export default function BatchStatusForm({ ...props }) {
                       disabled={processing || isView}
                     >
                       <option value={1}>Active</option>
-                      <option value={0}>Passing Out</option>
+                      <option value={0}>Out</option>
                     </select>
                   )}
                   <InputError message={errors.status} />
