@@ -95,11 +95,18 @@ class BatchSemModuleController extends Controller
             ]);
         }
 
+        $batches = Batch::select('id', 'batch_name')->orderBy('batch_name')->get();
+        $departments = \App\Models\Department::select('id', 'dept_name', 'dept_code')->get();
+    $modules = Module::select('id', 'module_name', 'module_code', 'department_id')->get();
+
         return Inertia::render('batch-sem-modules/index', [
             'batchSemModules' => $batchSemModules,
             'filters' => $request->only(['search', 'perPage']),
             'totalCount' => $totalCount,
             'filteredCount' => $filteredCount,
+            'batches' => $batches,
+            'departments' => $departments,
+            'modules' => $modules,
         ]);
     }
 

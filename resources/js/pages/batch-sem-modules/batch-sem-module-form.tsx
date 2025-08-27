@@ -83,19 +83,26 @@ interface BatchSemModuleFormProps {
     isEdit?: boolean;
 }
 
-export default function BatchSemModuleForm({
-    batchSemModule,
-    modules,
-    employees,
-    lecturers,
-    batchStatuses,
-    batchStatusesAll,
-    batches,
-    modulePrerequisites,
-    departments = [],
-    isView,
-    isEdit
-}: BatchSemModuleFormProps) {
+export default function BatchSemModuleForm(props: BatchSemModuleFormProps) {
+    const {
+        batchSemModule,
+        modules,
+        employees,
+        lecturers,
+        batchStatuses,
+        batchStatusesAll,
+        batches,
+        modulePrerequisites,
+        departments = [],
+        isView,
+        isEdit
+    } = props;
+    // Read batch and department from query params
+    // ...existing code...
+    // Read batch and department from query params
+    const urlParams = typeof window !== 'undefined' ? new URLSearchParams(window.location.search) : null;
+    const initialBatchId = urlParams?.get('batch') || '';
+    // ...existing code...
     // Use employees or lecturers, whichever is provided
     const employeeList = employees || lecturers || [];
     // Use batchStatuses or extract unique status names from batchStatusesAll
@@ -175,7 +182,19 @@ export default function BatchSemModuleForm({
         prerequisites: parsedPrerequisites,
         module_coordinator_id: batchSemModule?.module_coordinator_id || '',
         lecture_id: batchSemModule?.lecture_id || '',
-        batch_id: batchSemModule?.batch_id || '',
+        batch_id:
+            batchSemModule?.batch_id !== undefined && batchSemModule?.batch_id !== null
+                ? batchSemModule.batch_id
+                : batchSemModule?.batch_status_id !== undefined && batchSemModule?.batch_status_id !== null
+                    ? (() => {
+                        // Find batch id from batchStatusesAll using batch_status_id
+                        if (batchStatusesAll && batchSemModule.batch_status_id) {
+                            const found = batchStatusesAll.find(bs => bs.id === Number(batchSemModule.batch_status_id));
+                            return found ? found.batch_id : '';
+                        }
+                        return '';
+                    })()
+                    : initialBatchId,
         batch_status_id: batchSemModule?.batch_status_id || '',
         semester: batchSemModule?.semester || '',
         module_type: batchSemModule?.module_type || 'Core', // Default to 'Core'
