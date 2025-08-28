@@ -28,10 +28,10 @@ export function ExaminationPlanDropdown({ className }: ExaminationPlanDropdownPr
                         </Link>
                     </DropdownMenuItem>
                     <DropdownMenuItem asChild>
-                        <Link href="/exam-plan" className="flex items-center">
+                        <Link href="/exam-plans" className="flex items-center">
                             <BarChart3 className="mr-2 h-4 w-4" />
-                            <span className="text-red-600">Pending</span>
-                            {/* Exam Plan */}
+                            {/* <span className="text-red-600">Pending</span> */}
+                            Exams Plan
                         </Link>
                     </DropdownMenuItem>
                 </DropdownMenuContent>
