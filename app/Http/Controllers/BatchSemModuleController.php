@@ -21,6 +21,21 @@ class BatchSemModuleController extends Controller
     {
         $batchSemModulesQuery = BatchSemModule::with(['module', 'moduleCoordinator', 'lecture', 'batchStatus']);
 
+        // Filter by batch if selected
+        if ($request->filled('selectedBatch')) {
+            $batchSemModulesQuery->whereHas('batchStatus', function($q) use ($request) {
+                $q->where('batch_id', $request->selectedBatch);
+            });
+        }
+
+        // Filter by department if selected
+        if ($request->filled('selectedDepartment')) {
+            $batchSemModulesQuery->whereHas('module', function($q) use ($request) {
+                $q->where('department_id', $request->selectedDepartment);
+            });
+        }
+
+        // Search functionality
         if ($request->filled('search')) {
             $search = $request->string('search');
             $batchSemModulesQuery->whereHas('module', function($q) use ($search) {
