@@ -1,13 +1,13 @@
 import InputError from '@/components/input-error';
-import MarkSection from '@/components/mark-section';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import AppLayout from '@/layouts/app-layout';
 import { type BreadcrumbItem } from '@/types';
 import { Head, Link, useForm } from '@inertiajs/react';
-import { ArrowLeft, LoaderCircle } from 'lucide-react';
+import { ArrowLeft, LoaderCircle, Plus, X } from 'lucide-react';
 import React, { useEffect, useState } from 'react';
 
 interface Lecturer {
@@ -271,38 +271,218 @@ export default function ExamPlanForm({ examPlan, isView, isEdit, lecturers, depa
                         </CardHeader>
                         <CardContent className="space-y-6">
                             {/* Final Marks */}
-                            <MarkSection
-                                title="Final Marks"
-                                marks={finalMarks}
-                                setMarks={setFinalMarks}
-                                isView={isView}
-                            />
+                            <div className="space-y-3">
+                                <div className="flex items-center justify-between">
+                                    <Label>Final Marks</Label>
+                                    {!isView && (
+                                        <Button
+                                            type="button"
+                                            variant="outline"
+                                            size="sm"
+                                            onClick={() => setFinalMarks([...finalMarks, { name: '', marks: 0 }])}
+                                        >
+                                            <Plus className="h-4 w-4 mr-2" />
+                                            Add
+                                        </Button>
+                                    )}
+                                </div>
+                                <div className="space-y-2">
+                                    {finalMarks.map((mark, index) => (
+                                        <div key={index} className="flex gap-2">
+                                            <Input
+                                                type="number"
+                                                placeholder="Marks"
+                                                value={mark.marks}
+                                                onChange={(e) => {
+                                                    const newMarks = [...finalMarks];
+                                                    newMarks[index] = { ...newMarks[index], marks: parseInt(e.target.value) || 0 };
+                                                    setFinalMarks(newMarks);
+                                                }}
+                                                disabled={isView}
+                                                className="w-32"
+                                                min="0"
+                                                max="100"
+                                            />
+                                            {!isView && finalMarks.length > 1 && (
+                                                <Button
+                                                    type="button"
+                                                    variant="outline"
+                                                    size="sm"
+                                                    onClick={() => setFinalMarks(finalMarks.filter((_, i) => i !== index))}
+                                                >
+                                                    <X className="h-4 w-4" />
+                                                </Button>
+                                            )}
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
 
                             {/* Mid Marks */}
-                            <MarkSection
-                                title="Mid Marks"
-                                marks={midMarks}
-                                setMarks={setMidMarks}
-                                isView={isView}
-                            />
+                            <div className="space-y-3">
+                                <div className="flex items-center justify-between">
+                                    <Label>Mid Marks</Label>
+                                    {!isView && (
+                                        <Button
+                                            type="button"
+                                            variant="outline"
+                                            size="sm"
+                                            onClick={() => setMidMarks([...midMarks, { name: '', marks: 0 }])}
+                                        >
+                                            <Plus className="h-4 w-4 mr-2" />
+                                            Add
+                                        </Button>
+                                    )}
+                                </div>
+                                <div className="space-y-2">
+                                    {midMarks.map((mark, index) => (
+                                        <div key={index} className="flex gap-2">
+                                            <Input
+                                                type="number"
+                                                placeholder="Marks"
+                                                value={mark.marks}
+                                                onChange={(e) => {
+                                                    const newMarks = [...midMarks];
+                                                    newMarks[index] = { ...newMarks[index], marks: parseInt(e.target.value) || 0 };
+                                                    setMidMarks(newMarks);
+                                                }}
+                                                disabled={isView}
+                                                className="w-32"
+                                                min="0"
+                                                max="100"
+                                            />
+                                            {!isView && midMarks.length > 1 && (
+                                                <Button
+                                                    type="button"
+                                                    variant="outline"
+                                                    size="sm"
+                                                    onClick={() => setMidMarks(midMarks.filter((_, i) => i !== index))}
+                                                >
+                                                    <X className="h-4 w-4" />
+                                                </Button>
+                                            )}
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
 
                             {/* CA Marks */}
-                            <MarkSection
-                                title="CA Marks"
-                                marks={caMarks}
-                                setMarks={setCaMarks}
-                                isView={isView}
-                                showName
-                            />
+                            <div className="space-y-3">
+                                <div className="flex items-center justify-between">
+                                    <Label>CA Marks</Label>
+                                    {!isView && (
+                                        <Button
+                                            type="button"
+                                            variant="outline"
+                                            size="sm"
+                                            onClick={() => setCaMarks([...caMarks, { name: '', marks: 0 }])}
+                                        >
+                                            <Plus className="h-4 w-4 mr-2" />
+                                            Add
+                                        </Button>
+                                    )}
+                                </div>
+                                <div className="space-y-2">
+                                    {caMarks.map((mark, index) => (
+                                        <div key={index} className="flex gap-2">
+                                            <Input
+                                                placeholder="Mark name"
+                                                value={mark.name}
+                                                onChange={(e) => {
+                                                    const newMarks = [...caMarks];
+                                                    newMarks[index] = { ...newMarks[index], name: e.target.value };
+                                                    setCaMarks(newMarks);
+                                                }}
+                                                disabled={isView}
+                                                className="flex-1"
+                                            />
+                                            <Input
+                                                type="number"
+                                                placeholder="Marks"
+                                                value={mark.marks}
+                                                onChange={(e) => {
+                                                    const newMarks = [...caMarks];
+                                                    newMarks[index] = { ...newMarks[index], marks: parseInt(e.target.value) || 0 };
+                                                    setCaMarks(newMarks);
+                                                }}
+                                                disabled={isView}
+                                                className="w-24"
+                                                min="0"
+                                                max="100"
+                                            />
+                                            {!isView && caMarks.length > 1 && (
+                                                <Button
+                                                    type="button"
+                                                    variant="outline"
+                                                    size="sm"
+                                                    onClick={() => setCaMarks(caMarks.filter((_, i) => i !== index))}
+                                                >
+                                                    <X className="h-4 w-4" />
+                                                </Button>
+                                            )}
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
 
                             {/* Other Marks */}
-                            <MarkSection
-                                title="Other Marks"
-                                marks={otherMarks}
-                                setMarks={setOtherMarks}
-                                isView={isView}
-                                showName
-                            />
+                            <div className="space-y-3">
+                                <div className="flex items-center justify-between">
+                                    <Label>Other Marks</Label>
+                                    {!isView && (
+                                        <Button
+                                            type="button"
+                                            variant="outline"
+                                            size="sm"
+                                            onClick={() => setOtherMarks([...otherMarks, { name: '', marks: 0 }])}
+                                        >
+                                            <Plus className="h-4 w-4 mr-2" />
+                                            Add
+                                        </Button>
+                                    )}
+                                </div>
+                                <div className="space-y-2">
+                                    {otherMarks.map((mark, index) => (
+                                        <div key={index} className="flex gap-2">
+                                            <Input
+                                                placeholder="Mark name"
+                                                value={mark.name}
+                                                onChange={(e) => {
+                                                    const newMarks = [...otherMarks];
+                                                    newMarks[index] = { ...newMarks[index], name: e.target.value };
+                                                    setOtherMarks(newMarks);
+                                                }}
+                                                disabled={isView}
+                                                className="flex-1"
+                                            />
+                                            <Input
+                                                type="number"
+                                                placeholder="Marks"
+                                                value={mark.marks}
+                                                onChange={(e) => {
+                                                    const newMarks = [...otherMarks];
+                                                    newMarks[index] = { ...newMarks[index], marks: parseInt(e.target.value) || 0 };
+                                                    setOtherMarks(newMarks);
+                                                }}
+                                                disabled={isView}
+                                                className="w-24"
+                                                min="0"
+                                                max="100"
+                                            />
+                                            {!isView && otherMarks.length > 1 && (
+                                                <Button
+                                                    type="button"
+                                                    variant="outline"
+                                                    size="sm"
+                                                    onClick={() => setOtherMarks(otherMarks.filter((_, i) => i !== index))}
+                                                >
+                                                    <X className="h-4 w-4" />
+                                                </Button>
+                                            )}
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
                         </CardContent>
                     </Card>
 
