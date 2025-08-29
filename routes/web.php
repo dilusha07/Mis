@@ -11,6 +11,7 @@ use App\Http\Controllers\BatchStatusController;
 use App\Http\Controllers\ModulePrerequisiteController;
 use App\Http\Controllers\ExamAdmissionController;
 use App\Http\Controllers\AcademicAdvisorController;
+use App\Http\Controllers\ExamPlanController;
 use App\Http\Controllers\StuModuleRegisterController;
 
 Route::get('/', function () {
@@ -29,6 +30,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::resource('academic-years', AcademicYearController::class);
     Route::resource('exam-admissions', ExamAdmissionController::class);
     Route::resource('academic-advisors', AcademicAdvisorController::class);
+    Route::resource('exam-plans', ExamPlanController::class);
 
     Route::resource('stu-module-registers', StuModuleRegisterController::class);
     Route::post('stu-module-registers/register', [StuModuleRegisterController::class, 'register'])->name('stu-module-registers.register');
