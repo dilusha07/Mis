@@ -31,4 +31,8 @@ class Student extends Model
     {
         return $this->full_name ?: ($this->first_name . ' ' . $this->last_name);
     }
+
+    public function status() {
+        return $this->hasOne(StudentStatus::class, 'student_id', 'student_id');
+    }
 }
