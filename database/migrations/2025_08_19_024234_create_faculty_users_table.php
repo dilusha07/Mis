@@ -29,7 +29,30 @@ return new class extends Migration
             $table->timestamps();
             $table->softDeletes()->comment('Soft delete timestamp');
         });
+
+        
+        // Insert default record
+        DB::table('faculty_users')->insert([
+            'user_id' => 1,
+            'user_name' => 'system_user',
+            'user_email' => 'systemuser@example.com',
+            'user_type' => 'Employee',
+            'first_name' => 'System',
+            'last_name' => 'User',
+            'full_name' => 'System User',
+            'gender' => 'Male',
+            'contact_number' => '0000000000',
+            'title' => 'Mr.',
+            'NIC' => '000000000V',
+            'active_status' => 'Active',
+            'created_by' => 1,
+            'modified_by' => null,
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
     }
+
+    
 
     /**
      * Reverse the migrations.
