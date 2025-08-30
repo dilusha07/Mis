@@ -1,37 +1,29 @@
 import { NavFooter } from '@/components/nav-footer';
-import { NavMain } from '@/components/nav-main';
 import { NavUser } from '@/components/nav-user';
 import { Sidebar, SidebarContent, SidebarFooter, SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem } from '@/components/ui/sidebar';
 import { type NavItem } from '@/types';
 import { Link } from '@inertiajs/react';
-import { BookOpen, Folder, LayoutGrid, FileText, ChevronDown, Plus, Calendar, ClipboardList } from 'lucide-react';
+import { BookOpen, Folder, LayoutGrid } from 'lucide-react';
 import AppLogo from './app-logo';
 import { AdministrationDropdown } from './administration-dropdown';
 import { ModuleDropdown } from './module-dropdown';
-import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem } from '@/components/ui/dropdown-menu';
-import { Button } from '@/components/ui/button';
 import { ExaminationPlanDropdown } from './examination-plan';
 import { StudentDropdown } from './student-dropdown';
+import { NavMain } from './nav-main';
 
 const mainNavItems: NavItem[] = [
-    {
-        title: 'Modules',
-        href: '/dashboard',
-        icon: LayoutGrid,
-    },
-
-
+   
 ];
 
 const footerNavItems: NavItem[] = [
     {
-        title: 'Repository',
-        href: 'https://github.com/laravel/react-starter-kit',
+        title: 'Permissions',
+        href: '',
         icon: Folder,
     },
     {
-        title: 'Documentation',
-        href: 'https://laravel.com/docs/starter-kits#react',
+        title: 'News',
+        href: 'https://lms.eng.ruh.ac.lk/mod/forum/view.php?id=2',
         icon: BookOpen,
     },
 ];
@@ -50,28 +42,16 @@ export function AppSidebar() {
                     </SidebarMenuItem>
                 </SidebarMenu>
             </SidebarHeader>
-
-
-
-
-
             <SidebarContent>
-                {/* <NavMain items={mainNavItems} /> */}
+                <NavMain items={mainNavItems} />
                 {/*Dropdown */}
                 <div className="mt-2">
                     <ModuleDropdown />
-                    <AdministrationDropdown />
                     <ExaminationPlanDropdown />
                     <StudentDropdown />
-
+                    <AdministrationDropdown />
                 </div>
-
             </SidebarContent>
-
-
-
-
-
             <SidebarFooter>
                 <NavFooter items={footerNavItems} className="mt-auto" />
                 <NavUser />
