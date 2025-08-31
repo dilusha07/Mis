@@ -39,6 +39,13 @@ export function ModuleDropdown({ className }: ModuleDropdownProps) {
                             Module Plan
                         </Link>
                     </DropdownMenuItem>
+                    <DropdownMenuItem asChild>
+                        <Link href="/stu-module-registers" className="flex items-center">
+                            <ClipboardList className="mr-2 h-4 w-4" />
+                            Module Registration
+                        </Link>
+                    </DropdownMenuItem>
+
                     {/* <DropdownMenuItem asChild>
                         <Link href="/modules/create" className="flex items-center">
                             <Settings className="mr-2 h-4 w-4" />
