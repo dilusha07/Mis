@@ -154,7 +154,14 @@ export default function Index({ examPlans, filters, totalCount, filteredCount }:
                         <X size={20} />
                     </Button>
 
-                    <div className="ml-auto">
+                    <div className="ml-auto flex gap-2">
+                        <Link
+                            className="text-md flex cursor-pointer items-center rounded-lg bg-green-600 px-4 py-2 text-white hover:opacity-90"
+                            as="button"
+                            href={route('exam-plans.create')}
+                        >
+                            Enter Marks
+                        </Link>
                         <Link
                             className="text-md flex cursor-pointer items-center rounded-lg bg-indigo-800 px-4 py-2 text-white hover:opacity-90"
                             as="button"
@@ -175,6 +182,7 @@ export default function Index({ examPlans, filters, totalCount, filteredCount }:
                     onEdit={() => {}}
                 />
 
+                {/* Temporarily commented out pagination
                 <Pagination
                     products={examPlans}
                     perPage={data.perPage}
@@ -183,6 +191,7 @@ export default function Index({ examPlans, filters, totalCount, filteredCount }:
                     filteredCount={filteredCount}
                     search={data.search}
                 />
+                */}
             </div>
         </AppLayout>
     );
