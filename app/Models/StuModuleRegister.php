@@ -28,7 +28,7 @@ class StuModuleRegister extends Model
     // Relationship: Student
     public function student()
     {
-        return $this->belongsTo(Student::class, 'student_id');
+        return $this->belongsTo(Student::class, 'student_id', 'student_id');
     }
 
     // Relationship: Module

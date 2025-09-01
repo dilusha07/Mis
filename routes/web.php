@@ -2,6 +2,7 @@
 
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
+use Maatwebsite\Excel\Facades\Excel;
 use App\Http\Controllers\CurriculumController;
 use App\Http\Controllers\AcademicYearController;
 use App\Http\Controllers\ModuleController;
@@ -31,6 +32,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::resource('exam-admissions', ExamAdmissionController::class);
     Route::resource('academic-advisors', AcademicAdvisorController::class);
     Route::resource('exam-plans', ExamPlanController::class);
+    Route::get('exam-plans/{examPlan}/download-excel', [ExamPlanController::class, 'downloadExcel'])->name('exam-plans.download-excel');
 
     Route::resource('stu-module-registers', StuModuleRegisterController::class);
     Route::post('stu-module-registers/register', [StuModuleRegisterController::class, 'register'])->name('stu-module-registers.register');

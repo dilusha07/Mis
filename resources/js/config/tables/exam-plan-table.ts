@@ -11,6 +11,7 @@ export const ExamPlanTableConfig = {
     actions: [
         { label: 'View', icon: 'Eye' as const, route: 'exam-plans.show', className: 'cursor-pointer rounded-lg bg-sky-600 p-2 text-white hover:opacity-90' },
         { label: 'Edit', icon: 'Pencil' as const, route: 'exam-plans.edit', className: 'ms-2 cursor-pointer rounded-lg bg-blue-600 p-2 text-white hover:opacity-90' },
+        { label: 'Download Excel', icon: 'FileDown' as const, route: 'exam-plans.download-excel', className: 'ms-2 cursor-pointer rounded-lg bg-green-600 p-2 text-white hover:opacity-90' },
         { label: 'Delete', icon: 'Trash2' as const, route: 'exam-plans.destroy', className: 'ms-2 cursor-pointer rounded-lg bg-red-600 p-2 text-white hover:opacity-90' },
     ],
 };

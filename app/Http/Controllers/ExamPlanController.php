@@ -7,11 +7,13 @@ use App\Models\Employee;
 use App\Models\Department;
 use App\Models\Module;
 use App\Http\Requests\ExamPlanFormRequest;
+use App\Exports\ExamPlanExport;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 use Inertia\Inertia;
+use Maatwebsite\Excel\Facades\Excel;
 
 class ExamPlanController extends Controller
 {
@@ -249,6 +251,26 @@ class ExamPlanController extends Controller
         } catch (Exception $e) {
             Log::error('Exam plan deletion failed: ' . $e->getMessage());
             return redirect()->back()->with('error', 'Unable to delete exam plan. Please try again!');
+        }
+    }
+
+    /**
+     * Download Excel file for the specified exam plan.
+     */
+    public function downloadExcel(ExamPlan $examPlan)
+    {
+        try {
+            $examPlan->load(['firstExaminer', 'secondExaminer', 'module']);
+            
+            $filename = 'exam_plan_' . $examPlan->module->module_code . '_' . date('Y-m-d_H-i-s') . '.xlsx';
+            
+            Log::info('Exam plan Excel download requested. ID: ' . $examPlan->id . ' by User: ' . Auth::id());
+            
+            return Excel::download(new ExamPlanExport($examPlan->id), $filename);
+            
+        } catch (Exception $e) {
+            Log::error('Exam plan Excel download failed: ' . $e->getMessage());
+            return redirect()->back()->with('error', 'Unable to download Excel file. Please try again!');
         }
     }
 
