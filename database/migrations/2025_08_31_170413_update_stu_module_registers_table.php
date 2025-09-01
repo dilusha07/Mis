@@ -18,6 +18,9 @@ return new class extends Migration
 
             // Change datatype of reg_status
             $table->enum('reg_status', ['pending', 'registered'])->comment('Registration status')->change();
+
+            // unique constraint to avoid duplicate registration for the same module
+            $table->unique(['student_id', 'module_id']);
         });
     
 
