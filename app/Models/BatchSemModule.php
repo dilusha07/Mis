@@ -33,7 +33,7 @@ class BatchSemModule extends Model
      */
     public function module(): BelongsTo
     {
-        return $this->belongsTo(Module::class);
+        return $this->belongsTo(Module::class, 'module_id');
     }
 
     /**
@@ -73,7 +73,7 @@ class BatchSemModule extends Model
      */
     public function batchStatus(): BelongsTo
     {
-        return $this->belongsTo(BatchStatus::class);
+        return $this->belongsTo(BatchStatus::class, 'batch_status_id');
     }
 
     /**

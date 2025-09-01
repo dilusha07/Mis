@@ -29,7 +29,7 @@ class ExamAdmission extends Model
 
     public function batchSemModule(): BelongsTo
     {
-        return $this->belongsTo(BatchSemModule::class);
+        return $this->belongsTo(BatchSemModule::class, 'batch_sem_module_id');
     }
 
     public function creator(): BelongsTo

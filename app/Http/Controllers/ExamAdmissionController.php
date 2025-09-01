@@ -15,18 +15,25 @@ class ExamAdmissionController extends Controller
      */
     public function index(Request $request)
     {
-        $examAdmissionsQuery = ExamAdmission::with(['batchSemModule.module', 'batchSemModule.batchStatus']);
+        // Use a more direct approach with joins to ensure we get the data
+        $examAdmissionsQuery = ExamAdmission::join('batch_sem_modules', 'exam_admissions.batch_sem_module_id', '=', 'batch_sem_modules.id')
+            ->join('modules', 'batch_sem_modules.module_id', '=', 'modules.id')
+            ->join('batch_statuses', 'batch_sem_modules.batch_status_id', '=', 'batch_statuses.id')
+            ->select(
+                'exam_admissions.*',
+                'modules.module_name',
+                'modules.module_code',
+                'batch_statuses.semester'
+            );
 
         if ($request->filled('search')) {
             $search = $request->string('search');
-            $examAdmissionsQuery->where(fn($q) => $q
-                ->whereHas('batchSemModule.module', function($query) use ($search) {
-                    $query->where('module_name', 'like', "%{$search}%")
-                          ->orWhere('module_code', 'like', "%{$search}%");
-                })
-                ->orWhere('venue', 'like', "%{$search}%")
-                ->orWhere('student_group', 'like', "%{$search}%")
-            );
+            $examAdmissionsQuery->where(function($q) use ($search) {
+                $q->where('modules.module_name', 'like', "%{$search}%")
+                  ->orWhere('modules.module_code', 'like', "%{$search}%")
+                  ->orWhere('exam_admissions.venue', 'like', "%{$search}%")
+                  ->orWhere('exam_admissions.student_group', 'like', "%{$search}%");
+            });
         }
 
         $totalCount = ExamAdmission::count();
@@ -36,9 +43,9 @@ class ExamAdmissionController extends Controller
         if ($perPage === -1) {
             $data = $examAdmissionsQuery->latest()->get()->map(fn($ea) => [
                 'id' => $ea->id,
-                'module_name' => $ea->batchSemModule?->module?->module_name ?? 'N/A',
-                'module_code' => $ea->batchSemModule?->module?->module_code ?? 'N/A',
-                'semester' => $ea->batchSemModule?->semester ?? 'N/A',
+                'module_name' => $ea->module_name ?? 'N/A',
+                'module_code' => $ea->module_code ?? 'N/A',
+                'semester' => $ea->semester ?? 'N/A',
                 'exam_date' => $ea->exam_date?->format('d M Y'),
                 'start_time' => $ea->start_time?->format('H:i'),
                 'end_time' => $ea->end_time?->format('H:i'),
@@ -59,9 +66,9 @@ class ExamAdmissionController extends Controller
             $examAdmissions = $examAdmissionsQuery->latest()->paginate($perPage)->withQueryString();
             $examAdmissions->getCollection()->transform(fn($ea) => [
                 'id' => $ea->id,
-                'module_name' => $ea->batchSemModule?->module?->module_name ?? 'N/A',
-                'module_code' => $ea->batchSemModule?->module?->module_code ?? 'N/A',
-                'semester' => $ea->batchSemModule?->semester ?? 'N/A',
+                'module_name' => $ea->module_name ?? 'N/A',
+                'module_code' => $ea->module_code ?? 'N/A',
+                'semester' => $ea->semester ?? 'N/A',
                 'exam_date' => $ea->exam_date?->format('d M Y'),
                 'start_time' => $ea->start_time?->format('H:i'),
                 'end_time' => $ea->end_time?->format('H:i'),
@@ -85,7 +92,7 @@ class ExamAdmissionController extends Controller
     public function create()
     {
         $batchSemModules = BatchSemModule::with(['module', 'batchStatus'])
-            ->select('id', 'module_id', 'semester', 'batch_status_id')
+            ->select('id', 'module_id', 'batch_status_id')
             ->get();
 
         return Inertia::render('exam-admissions/exam-admission-form', [
@@ -129,7 +136,6 @@ class ExamAdmissionController extends Controller
             'updated_at' => $examAdmission->updated_at?->toISOString(),
             'batchSemModule' => [
                 'id' => $examAdmission->batchSemModule?->id,
-                'semester' => $examAdmission->batchSemModule?->semester,
                 'module' => [
                     'module_name' => $examAdmission->batchSemModule?->module?->module_name,
                     'module_code' => $examAdmission->batchSemModule?->module?->module_code,
@@ -141,7 +147,7 @@ class ExamAdmissionController extends Controller
         ];
 
         $batchSemModules = BatchSemModule::with(['module', 'batchStatus'])
-            ->select('id', 'module_id', 'semester', 'batch_status_id')
+            ->select('id', 'module_id', 'batch_status_id')
             ->get();
 
         return Inertia::render('exam-admissions/exam-admission-form', [
@@ -171,7 +177,6 @@ class ExamAdmissionController extends Controller
             'updated_at' => $examAdmission->updated_at?->toISOString(),
             'batchSemModule' => [
                 'id' => $examAdmission->batchSemModule?->id,
-                'semester' => $examAdmission->batchSemModule?->semester,
                 'module' => [
                     'module_name' => $examAdmission->batchSemModule?->module?->module_name,
                     'module_code' => $examAdmission->batchSemModule?->module?->module_code,
@@ -183,7 +188,7 @@ class ExamAdmissionController extends Controller
         ];
 
         $batchSemModules = BatchSemModule::with(['module', 'batchStatus'])
-            ->select('id', 'module_id', 'semester', 'batch_status_id')
+            ->select('id', 'module_id', 'batch_status_id')
             ->get();
 
         return Inertia::render('exam-admissions/exam-admission-form', [

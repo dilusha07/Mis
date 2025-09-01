@@ -82,13 +82,8 @@ class AcademicAdvisorController extends Controller
     public function create()
     {
         try {
-            // Simple test first - just get basic data
             $students = Student::all();
             $advisors = Employee::all();
-
-            // Debug logging
-            Log::info('Students count: ' . $students->count());
-            Log::info('Advisors count: ' . $advisors->count());
 
             // Transform data for the form
             $studentsData = $students->map(function($student) {
@@ -106,21 +101,12 @@ class AcademicAdvisorController extends Controller
                 ];
             });
 
-            // Check if we have data
-            if ($students->isEmpty()) {
-                Log::warning('No students found in database');
-            }
-            if ($advisors->isEmpty()) {
-                Log::warning('No employees found in database');
-            }
-
             return Inertia::render('academic-advisors/academic-advisor-form', [
                 'students' => $studentsData,
                 'advisors' => $advisorsData,
             ]);
         } catch (Exception $e) {
             Log::error('Academic Advisor create form failed: ' . $e->getMessage());
-            Log::error('Stack trace: ' . $e->getTraceAsString());
             return redirect()->back()->with('error', 'Unable to load create form. Please try again!');
         }
     }
