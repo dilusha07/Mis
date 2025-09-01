@@ -10,30 +10,13 @@ import { Head, Link, useForm } from '@inertiajs/react';
 import { ArrowLeft, LoaderCircle, Plus, X } from 'lucide-react';
 import React, { useEffect, useState } from 'react';
 
-interface Lecturer {
-    id: number;
-    full_name: string;
-    department_id: number;
-}
-
-interface Department {
-    id: number;
-    dept_name: string;
-}
-
-interface Module {
-    id: number;
-    module_name: string;
-    module_code: string;
-    department_id: number;
-}
-
-interface MarkItem {
+// Types
+type MarkItem = {
     name: string;
     marks: number;
-}
+};
 
-interface ExamPlan {
+type ExamPlan = {
     id: number;
     first_examiner_id: number;
     second_examiner_id: number;
@@ -43,16 +26,131 @@ interface ExamPlan {
     mid_marks: string | MarkItem[];
     ca_marks: string | MarkItem[];
     other_marks: string | MarkItem[];
-}
+};
 
-interface ExamPlanFormProps {
+type Lecturer = {
+    id: number;
+    full_name: string;
+    department_id: number;
+};
+
+type Department = {
+    id: number;
+    dept_name: string;
+};
+
+type Module = {
+    id: number;
+    module_name: string;
+    module_code: string;
+    department_id: number;
+};
+
+type ExamPlanFormProps = {
     examPlan?: ExamPlan;
     isView?: boolean;
     isEdit?: boolean;
     lecturers: Lecturer[];
     departments: Department[];
     modules: Module[];
-}
+};
+
+// Components
+const MarksSection = ({
+    title,
+    marks,
+    onMarkChange,
+    onAddMark,
+    onRemoveMark,
+    isView,
+    showAddRemove = true,
+    showName = true,
+}: {
+    title: string;
+    marks: MarkItem[];
+    onMarkChange: (index: number, mark: MarkItem) => void;
+    onAddMark?: () => void;
+    onRemoveMark?: (index: number) => void;
+    isView: boolean;
+    showAddRemove?: boolean;
+    showName?: boolean;
+}) => (
+    <div className="space-y-3">
+        <div className="flex items-center justify-between">
+            <Label>{title}</Label>
+            {showAddRemove && !isView && onAddMark && (
+                <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={onAddMark}
+                >
+                    <Plus className="h-4 w-4 mr-2" />
+                    Add
+                </Button>
+            )}
+        </div>
+        <div className="space-y-2">
+            {marks.map((mark, index) => (
+                <div key={index} className="flex gap-2">
+                    <MarkInput
+                        mark={mark}
+                        onChange={(newMark) => onMarkChange(index, newMark)}
+                        isView={isView}
+                        showName={showName}
+                    />
+                    {showAddRemove && !isView && onRemoveMark && marks.length > 1 && (
+                        <Button
+                            type="button"
+                            variant="outline"
+                            size="sm"
+                            onClick={() => onRemoveMark(index)}
+                        >
+                            <X className="h-4 w-4" />
+                        </Button>
+                    )}
+                </div>
+            ))}
+        </div>
+    </div>
+);
+
+const MarkInput = ({
+    mark,
+    onChange,
+    isView,
+    showName = false
+}: {
+    mark: MarkItem;
+    onChange: (value: MarkItem) => void;
+    isView: boolean;
+    showName?: boolean;
+}) => (
+    <div className="flex gap-2">
+        {showName && (
+            <Input
+                placeholder="Mark name"
+                value={mark.name}
+                onChange={(e) => onChange({ ...mark, name: e.target.value })}
+                disabled={isView}
+                className="flex-1"
+            />
+        )}
+        <Input
+            type="number"
+            placeholder="Marks"
+            value={mark.marks || ''}
+            onChange={(e) => {
+                const value = e.target.value === '' ? 0 : Number(e.target.value);
+                onChange({ ...mark, marks: value });
+            }}
+            disabled={isView}
+            className={showName ? "w-24" : "w-32"}
+            min="0"
+            max="100"
+        />
+    </div>
+);
 
 export default function ExamPlanForm({ examPlan, isView, isEdit, lecturers, departments, modules }: ExamPlanFormProps) {
     const breadcrumbs: BreadcrumbItem[] = [
@@ -62,15 +160,46 @@ export default function ExamPlanForm({ examPlan, isView, isEdit, lecturers, depa
         },
     ];
 
-    const parseMarks = (marks: string | MarkItem[] | undefined): MarkItem[] => {
-        if (!marks) return [{ name: '', marks: 0 }];
+    // Helper functions
+    const parseMarks = (marks: string | MarkItem[] | undefined, defaultName?: string): MarkItem[] => {
+        if (!marks) return [{ name: defaultName || '', marks: 0 }];
         return typeof marks === 'string' ? JSON.parse(marks) : marks;
     };
 
-    const [finalMarks, setFinalMarks] = useState<MarkItem[]>(parseMarks(examPlan?.final_marks));
-    const [midMarks, setMidMarks] = useState<MarkItem[]>(parseMarks(examPlan?.mid_marks));
+    // Mark state management
+    const [finalMarks, setFinalMarks] = useState<MarkItem[]>(parseMarks(examPlan?.final_marks, 'Final'));
+    const [midMarks, setMidMarks] = useState<MarkItem[]>(parseMarks(examPlan?.mid_marks, 'Mid'));
     const [caMarks, setCaMarks] = useState<MarkItem[]>(parseMarks(examPlan?.ca_marks));
     const [otherMarks, setOtherMarks] = useState<MarkItem[]>(parseMarks(examPlan?.other_marks));
+
+    // Mark section handlers
+    const handleMarkChange = (
+        marks: MarkItem[],
+        setMarks: React.Dispatch<React.SetStateAction<MarkItem[]>>,
+        index: number,
+        newMark: MarkItem
+    ) => {
+        const newMarks = [...marks];
+        newMarks[index] = newMark;
+        setMarks(newMarks);
+    };
+
+    const handleAddMark = (
+        marks: MarkItem[],
+        setMarks: React.Dispatch<React.SetStateAction<MarkItem[]>>
+    ) => {
+        setMarks([...marks, { name: '', marks: 0 }]);
+    };
+
+    const handleRemoveMark = (
+        marks: MarkItem[],
+        setMarks: React.Dispatch<React.SetStateAction<MarkItem[]>>,
+        index: number
+    ) => {
+        if (marks.length > 1) {
+            setMarks(marks.filter((_, i) => i !== index));
+        }
+    };
 
     interface FormData {
         first_examiner_id: string;
@@ -274,17 +403,6 @@ export default function ExamPlanForm({ examPlan, isView, isEdit, lecturers, depa
                             <div className="space-y-3">
                                 <div className="flex items-center justify-between">
                                     <Label>Final Marks</Label>
-                                    {!isView && (
-                                        <Button
-                                            type="button"
-                                            variant="outline"
-                                            size="sm"
-                                            onClick={() => setFinalMarks([...finalMarks, { name: '', marks: 0 }])}
-                                        >
-                                            <Plus className="h-4 w-4 mr-2" />
-                                            Add
-                                        </Button>
-                                    )}
                                 </div>
                                 <div className="space-y-2">
                                     {finalMarks.map((mark, index) => (
@@ -292,10 +410,11 @@ export default function ExamPlanForm({ examPlan, isView, isEdit, lecturers, depa
                                             <Input
                                                 type="number"
                                                 placeholder="Marks"
-                                                value={mark.marks}
+                                                value={mark.marks || ''}
                                                 onChange={(e) => {
                                                     const newMarks = [...finalMarks];
-                                                    newMarks[index] = { ...newMarks[index], marks: parseInt(e.target.value) || 0 };
+                                                    const value = e.target.value === '' ? 0 : Number(e.target.value);
+                                                    newMarks[index] = { ...newMarks[index], marks: value };
                                                     setFinalMarks(newMarks);
                                                 }}
                                                 disabled={isView}
@@ -303,16 +422,7 @@ export default function ExamPlanForm({ examPlan, isView, isEdit, lecturers, depa
                                                 min="0"
                                                 max="100"
                                             />
-                                            {!isView && finalMarks.length > 1 && (
-                                                <Button
-                                                    type="button"
-                                                    variant="outline"
-                                                    size="sm"
-                                                    onClick={() => setFinalMarks(finalMarks.filter((_, i) => i !== index))}
-                                                >
-                                                    <X className="h-4 w-4" />
-                                                </Button>
-                                            )}
+
                                         </div>
                                     ))}
                                 </div>
@@ -322,17 +432,6 @@ export default function ExamPlanForm({ examPlan, isView, isEdit, lecturers, depa
                             <div className="space-y-3">
                                 <div className="flex items-center justify-between">
                                     <Label>Mid Marks</Label>
-                                    {!isView && (
-                                        <Button
-                                            type="button"
-                                            variant="outline"
-                                            size="sm"
-                                            onClick={() => setMidMarks([...midMarks, { name: '', marks: 0 }])}
-                                        >
-                                            <Plus className="h-4 w-4 mr-2" />
-                                            Add
-                                        </Button>
-                                    )}
                                 </div>
                                 <div className="space-y-2">
                                     {midMarks.map((mark, index) => (
@@ -340,10 +439,11 @@ export default function ExamPlanForm({ examPlan, isView, isEdit, lecturers, depa
                                             <Input
                                                 type="number"
                                                 placeholder="Marks"
-                                                value={mark.marks}
+                                                value={mark.marks || ''}
                                                 onChange={(e) => {
                                                     const newMarks = [...midMarks];
-                                                    newMarks[index] = { ...newMarks[index], marks: parseInt(e.target.value) || 0 };
+                                                    const value = e.target.value === '' ? 0 : Number(e.target.value);
+                                                    newMarks[index] = { ...newMarks[index], marks: value };
                                                     setMidMarks(newMarks);
                                                 }}
                                                 disabled={isView}
@@ -399,10 +499,11 @@ export default function ExamPlanForm({ examPlan, isView, isEdit, lecturers, depa
                                             <Input
                                                 type="number"
                                                 placeholder="Marks"
-                                                value={mark.marks}
+                                                value={mark.marks || ''}
                                                 onChange={(e) => {
                                                     const newMarks = [...caMarks];
-                                                    newMarks[index] = { ...newMarks[index], marks: parseInt(e.target.value) || 0 };
+                                                    const value = e.target.value === '' ? 0 : Number(e.target.value);
+                                                    newMarks[index] = { ...newMarks[index], marks: value };
                                                     setCaMarks(newMarks);
                                                 }}
                                                 disabled={isView}
@@ -458,10 +559,11 @@ export default function ExamPlanForm({ examPlan, isView, isEdit, lecturers, depa
                                             <Input
                                                 type="number"
                                                 placeholder="Marks"
-                                                value={mark.marks}
+                                                value={mark.marks || ''}
                                                 onChange={(e) => {
                                                     const newMarks = [...otherMarks];
-                                                    newMarks[index] = { ...newMarks[index], marks: parseInt(e.target.value) || 0 };
+                                                    const value = e.target.value === '' ? 0 : Number(e.target.value);
+                                                    newMarks[index] = { ...newMarks[index], marks: value };
                                                     setOtherMarks(newMarks);
                                                 }}
                                                 disabled={isView}

@@ -9,6 +9,7 @@ use App\Models\Module;
 use App\Http\Requests\ExamPlanFormRequest;
 use Exception;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 use Inertia\Inertia;
 
@@ -20,7 +21,8 @@ class ExamPlanController extends Controller
     public function index(Request $request)
     {
         try {
-            $examPlansQuery = ExamPlan::with(['firstExaminer', 'secondExaminer', 'department', 'module']);
+            $examPlansQuery = ExamPlan::with(['firstExaminer', 'secondExaminer', 'department', 'module'])
+                ->where('created_by', Auth::id()); // Only show exam plans created by the current user
 
             if ($request->filled('search')) {
                 $search = $request->string('search');
@@ -30,9 +32,7 @@ class ExamPlanController extends Controller
                 });
             }
 
-
-
-            $totalCount = ExamPlan::count();
+            $totalCount = ExamPlan::where('created_by', Auth::id())->count();
             $filteredCount = (clone $examPlansQuery)->count();
             $perPage = (int) ($request->perPage ?? 10);
 
@@ -129,11 +129,11 @@ class ExamPlanController extends Controller
             $validatedData = $request->validated();
 
             $examPlan = ExamPlan::create($validatedData + [
-                'created_by' => auth()->id(),
+                'created_by' => Auth::id(),
             ]);
 
             if ($examPlan) {
-                Log::info('Exam plan created successfully. ID: ' . $examPlan->id . ' by User: ' . auth()->id());
+                Log::info('Exam plan created successfully. ID: ' . $examPlan->id . ' by User: ' . Auth::id());
                 return redirect()->route('exam-plans.index')->with('success', 'Exam plan created successfully.');
             }
 
@@ -225,10 +225,10 @@ class ExamPlanController extends Controller
             $validatedData = $request->validated();
 
             $examPlan->update($validatedData + [
-                'edited_by' => auth()->id(),
+                'edited_by' => Auth::id(),
             ]);
 
-            Log::info('Exam plan updated successfully. ID: ' . $examPlan->id . ' by User: ' . auth()->id());
+            Log::info('Exam plan updated successfully. ID: ' . $examPlan->id . ' by User: ' . Auth::id());
             return redirect()->route('exam-plans.index')->with('success', 'Exam plan updated successfully.');
 
         } catch (Exception $e) {
@@ -244,7 +244,7 @@ class ExamPlanController extends Controller
     {
         try {
             $examPlan->delete();
-            Log::info('Exam plan deleted successfully. ID: ' . $examPlan->id . ' by User: ' . auth()->id());
+            Log::info('Exam plan deleted successfully. ID: ' . $examPlan->id . ' by User: ' . Auth::id());
             return redirect()->route('exam-plans.index')->with('success', 'Exam plan deleted successfully.');
         } catch (Exception $e) {
             Log::error('Exam plan deletion failed: ' . $e->getMessage());
