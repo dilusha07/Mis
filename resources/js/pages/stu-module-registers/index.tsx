@@ -22,7 +22,7 @@ export default function Index({ modules = [], filters = {}, student = null }: { 
 
   useEffect(() => {
     if (flashMessage) {
-      const timer = setTimeout(() => setShowAlert(false), 3000);
+      const timer = setTimeout(() => setShowAlert(false), 30000);
       return () => clearTimeout(timer);
     }
   }, [flashMessage]);
@@ -43,7 +43,7 @@ export default function Index({ modules = [], filters = {}, student = null }: { 
         {showAlert && flashMessage && (
           <Alert variant={'default'} className={`${flash?.success ? 'bg-green-800' : flash?.error ? 'bg-red-800' : ''} ml-auto max-w-md text-white`}>
             <AlertDescription className="text-white">
-              {flash.success ? 'Success!' : 'Error!'} {''}
+              {flash.success ? 'Success!' : 'Error!'} 
               {flashMessage}
             </AlertDescription>
           </Alert>
@@ -112,6 +112,8 @@ export default function Index({ modules = [], filters = {}, student = null }: { 
                                 module_id: mod.id,
                               }, {
                                 onSuccess: () => handleSearch(),
+                                preserveScroll: true,
+                                preserveState: false,
                               });
                             }}
                           >
