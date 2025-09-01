@@ -11,13 +11,18 @@ class Student extends Model
 
     protected $table = 'students';
 
+    protected $primaryKey = 'id';
+
     protected $fillable = [
-        'id',
         'student_id',
         'first_name',
         'last_name',
         'full_name',
-        'email',
+        'personal_email',
+        'university_email',
+        'batch_id',
+        'advisor_id',
+        'student_status',
         'created_by',
         'modified_by',
         'created_at',
