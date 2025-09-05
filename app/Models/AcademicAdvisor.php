@@ -9,6 +9,9 @@ class AcademicAdvisor extends Model
 {
     use HasFactory;
 
+    /**
+     * The attributes that are mass assignable.
+     */
     protected $fillable = [
         'id',
         'student_id',

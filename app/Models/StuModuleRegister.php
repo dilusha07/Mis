@@ -14,6 +14,9 @@ class StuModuleRegister extends Model
 
     protected $table = 'stu_module_registers';
 
+    /**
+     * The attributes that are mass assignable.
+     */
     protected $fillable = [
         'student_id',
         'batch_sem_module_id',

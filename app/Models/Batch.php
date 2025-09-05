@@ -13,6 +13,9 @@ class Batch extends Model
     protected $table = 'batches';
     protected $primaryKey = 'id';
 
+    /**
+     * The attributes that are mass assignable.
+     */
    protected $fillable = [
         'batch_name',
         'curriculum_id',
