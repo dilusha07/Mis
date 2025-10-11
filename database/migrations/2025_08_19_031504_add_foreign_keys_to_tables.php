@@ -56,12 +56,12 @@ return new class extends Migration
             $table->foreign('modified_by')->references('user_id')->on('faculty_users');
         });
 
-        //  batch_sem_modules
+    
+        // batch_sem_modules
         Schema::table('batch_sem_modules', function (Blueprint $table) {
+            $table->foreign('module_id')->references('id')->on('modules');
             $table->foreign('module_coordinator_id')->references('user_id')->on('employees');
             $table->foreign('lecture_id')->references('user_id')->on('employees');
-            $table->foreign('module_id')->references('id')->on('module');
-            $table->foreign('module_prerequisites_id')->references('id')->on('module_prerequisites');
             $table->foreign('batch_status_id')->references('id')->on('batch_statuses');
             $table->foreign('created_by')->references('user_id')->on('faculty_users');
             $table->foreign('modified_by')->references('user_id')->on('faculty_users');
@@ -114,12 +114,14 @@ return new class extends Migration
             $table->foreign('modified_by')->references('user_id')->on('faculty_users');
         });
 
-        //  module
+        //  modules
         Schema::table('modules', function (Blueprint $table) {
+            $table->foreign('curriculum_id')->references('id')->on('curriculums');
+            $table->foreign('department_id')->references('id')->on('departments');
             $table->foreign('created_by')->references('user_id')->on('faculty_users');
             $table->foreign('modified_by')->references('user_id')->on('faculty_users');
         });
-
+     
         //  departments
         Schema::table('departments', function (Blueprint $table) {
             $table->foreign('created_by')->references('user_id')->on('faculty_users');
@@ -158,7 +160,6 @@ return new class extends Migration
         //  module_prerequisites
         Schema::table('module_prerequisites', function (Blueprint $table) {
             $table->foreign('module_id')->references('id')->on('modules');
-            $table->foreign('pre_module_id')->references('id')->on('modules');
             $table->foreign('curriculum_id')->references('id')->on('curriculums');
             $table->foreign('created_by')->references('user_id')->on('faculty_users');
             $table->foreign('modified_by')->references('user_id')->on('faculty_users');
@@ -202,7 +203,6 @@ return new class extends Migration
 
         Schema::table('module_prerequisites', function (Blueprint $table) {
             $table->dropForeign(['module_id']);
-            $table->dropForeign(['pre_module_id']);
             $table->dropForeign(['curriculum_id']);
             $table->dropForeign(['created_by']);
             $table->dropForeign(['modified_by']);
@@ -239,6 +239,8 @@ return new class extends Migration
         });
 
         Schema::table('modules', function (Blueprint $table) {
+            $table->dropForeign(['curriculum_id']);
+            $table->dropForeign(['department_id']);
             $table->dropForeign(['created_by']);
             $table->dropForeign(['modified_by']);
         });
@@ -285,10 +287,9 @@ return new class extends Migration
         });
 
         Schema::table('batch_sem_modules', function (Blueprint $table) {
+            $table->dropForeign(['module_id']);
             $table->dropForeign(['module_coordinator_id']);
             $table->dropForeign(['lecture_id']);
-            $table->dropForeign(['module_id']);
-            $table->dropForeign(['module_prerequisites_id']);
             $table->dropForeign(['batch_status_id']);
             $table->dropForeign(['created_by']);
             $table->dropForeign(['modified_by']);

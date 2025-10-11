@@ -3,16 +3,126 @@
 namespace App\Http\Controllers;
 
 use App\Models\BatchSemModule;
+use App\Models\Module;
+use App\Models\ModulePrerequisite;
+use App\Models\Employee;
+use App\Models\BatchStatus;
+use App\Models\Batch;
+use App\Http\Requests\BatchSemModuleFormRequest;
 use Illuminate\Http\Request;
+use Inertia\Inertia;
 
 class BatchSemModuleController extends Controller
 {
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
-        //
+        $batchSemModulesQuery = BatchSemModule::with(['module', 'moduleCoordinator', 'lecture', 'batchStatus']);
+
+        // Filter by batch if selected
+        if ($request->filled('selectedBatch')) {
+            $batchSemModulesQuery->whereHas('batchStatus', function($q) use ($request) {
+                $q->where('batch_id', $request->selectedBatch);
+            });
+        }
+
+        // Filter by department if selected
+        if ($request->filled('selectedDepartment')) {
+            $batchSemModulesQuery->whereHas('module', function($q) use ($request) {
+                $q->where('department_id', $request->selectedDepartment);
+            });
+        }
+
+        // Search functionality
+        if ($request->filled('search')) {
+            $search = $request->string('search');
+            $batchSemModulesQuery->whereHas('module', function($q) use ($search) {
+                $q->where('module_name', 'like', "%{$search}%")
+                  ->orWhere('module_code', 'like', "%{$search}%");
+            });
+        }
+
+        $totalCount = BatchSemModule::count();
+        $filteredCount = (clone $batchSemModulesQuery)->count();
+        $perPage = (int) ($request->perPage ?? 10);
+
+        if ($perPage === -1) {
+            $data = $batchSemModulesQuery->latest()->get()->map(fn($bsm) => [
+                'id' => $bsm->id,
+                'module' => [
+                    'id' => $bsm->module?->id,
+                    'module_name' => $bsm->module?->module_name,
+                    'module_code' => $bsm->module?->module_code,
+                ],
+                'module_coordinator' => [
+                    'id' => $bsm->moduleCoordinator?->id,
+                    'name' => $bsm->moduleCoordinator?->full_name ?? 'N/A'
+                ],
+                'lecture' => [
+                    'id' => $bsm->lecture?->id,
+                    'name' => $bsm->lecture?->full_name ?? 'N/A'
+                ],
+                'batch_status' => [
+                    'id' => $bsm->batchStatus?->id,
+                    'name' => $bsm->batchStatus?->semester ?? 'N/A',
+                    'batch_name' => $bsm->batchStatus?->batch?->batch_name ?? 'N/A'
+                ],
+                'gpa_applicability' => $bsm->gpa_applicability,
+                'offering_type' => $bsm->offering_type,
+                'created_at' => $bsm->created_at?->format('d M Y'),
+            ]);
+
+            $batchSemModules = [
+                'data' => $data,
+                'total' => $filteredCount,
+                'per_page' => $perPage,
+                'from' => 1,
+                'to' => $filteredCount,
+                'links' => [],
+            ];
+        } else {
+            $batchSemModules = $batchSemModulesQuery->latest()->paginate($perPage)->withQueryString();
+            $batchSemModules->getCollection()->transform(fn($bsm) => [
+                'id' => $bsm->id,
+                'module' => [
+                    'id' => $bsm->module?->id,
+                    'module_name' => $bsm->module?->module_name,
+                    'module_code' => $bsm->module?->module_code,
+                ],
+                'module_coordinator' => [
+                    'id' => $bsm->moduleCoordinator?->id,
+                    'name' => $bsm->moduleCoordinator?->full_name ?? 'N/A'
+                ],
+                'lecture' => [
+                    'id' => $bsm->lecture?->id,
+                    'name' => $bsm->lecture?->full_name ?? 'N/A'
+                ],
+                'batch_status' => [
+                    'id' => $bsm->batchStatus?->id,
+                    'name' => $bsm->batchStatus?->semester ?? 'N/A',
+                    'batch_name' => $bsm->batchStatus?->batch?->batch_name ?? 'N/A'
+                ],
+                'gpa_applicability' => $bsm->gpa_applicability,
+                'offering_type' => $bsm->offering_type,
+                'created_at' => $bsm->created_at?->format('d M Y'),
+            ]);
+        }
+
+        $batches = Batch::select('id', 'batch_name')->orderBy('batch_name')->get();
+        $departments = \App\Models\Department::select('id', 'dept_name', 'dept_code')->get();
+    $modules = Module::select('id', 'module_name', 'module_code', 'department_id')->get();
+
+        return Inertia::render('batch-sem-modules/index', [
+            'batchSemModules' => $batchSemModules,
+            'filters' => $request->only(['search', 'perPage']),
+            'totalCount' => $totalCount,
+            'filteredCount' => $filteredCount,
+            'batches' => $batches,
+            'departments' => $departments,
+            'modules' => $modules,
+        ]);
     }
 
     /**
@@ -20,15 +130,55 @@ class BatchSemModuleController extends Controller
      */
     public function create()
     {
-        //
+        $batches = Batch::select('id', 'batch_name')->orderBy('batch_name')->get();
+
+        // Get modules with department information
+        $modules = Module::select('id', 'module_name', 'module_code', 'module_type', 'allowed_stream', 'department_id')->get();
+
+        // Get all module prerequisites with their relations
+        $modulePrerequisites = ModulePrerequisite::with('module')->get();
+
+        // Get departments for better organization
+        $departments = \App\Models\Department::select('id', 'dept_name', 'dept_code')->get();
+
+        $lecturers = Employee::where('primary_role', 'lecture')->select('id', 'full_name')->orderBy('full_name')->get();
+        $batchStatusesAll = BatchStatus::select('id', 'batch_id', 'semester', 'status')->orderBy('batch_id')->get();
+
+        return Inertia::render('batch-sem-modules/batch-sem-module-form', [
+            'batches' => $batches,
+            'modules' => $modules,
+            'modulePrerequisites' => $modulePrerequisites,
+            'lecturers' => $lecturers,
+            'batchStatusesAll' => $batchStatusesAll,
+            'departments' => $departments,
+        ]);
     }
 
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request)
+    public function store(BatchSemModuleFormRequest $request)
     {
-        //
+        $validatedData = $request->validated();
+
+        // Ensure prerequisites is an array
+        if (!isset($validatedData['prerequisites']) || !is_array($validatedData['prerequisites'])) {
+            $validatedData['prerequisites'] = [];
+        }
+
+        // Laravel will automatically JSON encode/decode this field based on the model cast
+
+        // Get the authenticated user ID
+        $userId = request()->user()->id ?? 1; // Default to 1 if no authenticated user
+
+        $batchSemModule = BatchSemModule::create($validatedData + [
+            'created_by' => $userId,
+        ]);
+
+        return redirect()->route('batch-sem-modules.index')->with(
+            $batchSemModule ? 'success' : 'error',
+            $batchSemModule ? 'Batch Semester Module created successfully.' : 'Unable to create batch semester module.'
+        );
     }
 
     /**
@@ -36,7 +186,25 @@ class BatchSemModuleController extends Controller
      */
     public function show(BatchSemModule $batchSemModule)
     {
-        //
+        $batchSemModule->load(['module', 'moduleCoordinator', 'lecture', 'batchStatus']);
+
+        $batches = Batch::select('id', 'batch_name')->orderBy('batch_name')->get();
+        $modules = Module::select('id', 'module_name', 'module_code', 'module_type', 'allowed_stream', 'department_id')->get();
+        $modulePrerequisites = ModulePrerequisite::with('module')->get();
+        $departments = \App\Models\Department::select('id', 'dept_name', 'dept_code')->get();
+        $lecturers = Employee::where('primary_role', 'lecture')->select('id', 'full_name')->orderBy('full_name')->get();
+        $batchStatusesAll = BatchStatus::select('id', 'batch_id', 'semester', 'status')->orderBy('batch_id')->get();
+
+        return Inertia::render('batch-sem-modules/batch-sem-module-form', [
+            'batchSemModule' => $batchSemModule,
+            'batches' => $batches,
+            'modules' => $modules,
+            'modulePrerequisites' => $modulePrerequisites,
+            'lecturers' => $lecturers,
+            'batchStatusesAll' => $batchStatusesAll,
+            'departments' => $departments,
+            'isView' => true,
+        ]);
     }
 
     /**
@@ -44,15 +212,52 @@ class BatchSemModuleController extends Controller
      */
     public function edit(BatchSemModule $batchSemModule)
     {
-        //
+        $batchSemModule->load(['module', 'moduleCoordinator', 'lecture', 'batchStatus']);
+
+        $batches = Batch::select('id', 'batch_name')->orderBy('batch_name')->get();
+        $modules = Module::select('id', 'module_name', 'module_code', 'module_type', 'allowed_stream', 'department_id')->get();
+        $modulePrerequisites = ModulePrerequisite::with('module')->get();
+        $departments = \App\Models\Department::select('id', 'dept_name', 'dept_code')->get();
+        $lecturers = Employee::where('primary_role', 'lecture')->select('id', 'full_name')->orderBy('full_name')->get();
+        $batchStatusesAll = BatchStatus::select('id', 'batch_id', 'semester', 'status')->orderBy('batch_id')->get();
+
+        return Inertia::render('batch-sem-modules/batch-sem-module-form', [
+            'batchSemModule' => $batchSemModule,
+            'batches' => $batches,
+            'modules' => $modules,
+            'modulePrerequisites' => $modulePrerequisites,
+            'lecturers' => $lecturers,
+            'batchStatusesAll' => $batchStatusesAll,
+            'departments' => $departments,
+            'isEdit' => true,
+        ]);
     }
 
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, BatchSemModule $batchSemModule)
+    public function update(BatchSemModuleFormRequest $request, BatchSemModule $batchSemModule)
     {
-        //
+        $validatedData = $request->validated();
+
+        // Ensure prerequisites is an array
+        if (!isset($validatedData['prerequisites']) || !is_array($validatedData['prerequisites'])) {
+            $validatedData['prerequisites'] = [];
+        }
+
+        // Laravel will automatically JSON encode/decode this field based on the model cast
+
+        // Get the authenticated user ID
+        $userId = request()->user()->id ?? 1; // Default to 1 if no authenticated user
+
+        $updated = $batchSemModule->update($validatedData + [
+            'modified_by' => $userId,
+        ]);
+
+        return redirect()->route('batch-sem-modules.index')->with(
+            $updated ? 'success' : 'error',
+            $updated ? 'Batch Semester Module updated successfully.' : 'Unable to update batch semester module.'
+        );
     }
 
     /**
@@ -60,6 +265,10 @@ class BatchSemModuleController extends Controller
      */
     public function destroy(BatchSemModule $batchSemModule)
     {
-        //
+        $deleted = $batchSemModule->delete();
+        return redirect()->back()->with(
+            $deleted ? 'success' : 'error',
+            $deleted ? 'Batch Semester Module deleted successfully.' : 'Unable to delete batch semester module.'
+        );
     }
 }

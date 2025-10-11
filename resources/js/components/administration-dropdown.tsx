@@ -1,54 +1,60 @@
-import { Link, usePage } from "@inertiajs/react";
+import { Link } from "@inertiajs/react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "./ui/dropdown-menu";
-import { BrickWall, ChevronDown } from "lucide-react";
+import { BookOpen, BrickWall, CalendarDays, ChevronDown, ListChecks, Users } from "lucide-react";
+import { Button } from "./ui/button";
 
-export function AdministrationDropdown() {
-    const { url: currentUrl } = usePage<{ url: string }>().props;
+export function AdministrationDropdown({className ='',...props} :React.HTMLAttributes<HTMLDivElement>) {
 
-    return (
-        <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-                <button className="flex w-full justify-between items-center px-3 py-2 rounded-lg text-sm font-medium hover:bg-accent hover:text-accent-foreground">
-                    <div className="flex items-center gap-2">
-                        <BrickWall className="size-4" />
-                        Administration
-                    </div>
-                    <ChevronDown className="size-4 transition-transform data-[state=open]:rotate-180" />
-                </button>
-            </DropdownMenuTrigger>
+ return (
+    <div className={className} {...props}>
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <Button variant="ghost" className="w-full justify-between text-left font-normal">
+            <div className="flex items-center gap-2">
+                <BrickWall className="h-4 w-4" />
+                <span>Administration</span>
+            </div>
+            <ChevronDown className="h-4 w-4" />
+         </Button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="start" className="w-56">
+          <DropdownMenuItem asChild>
+            <Link href="/curriculums">
+              <span className="flex items-center gap-2">
+                <BookOpen className="h-5 w-5" />
+                Curriculums
+              </span>
+            </Link>
+          </DropdownMenuItem>
 
-            <DropdownMenuContent className="mt-1 min-w-[12rem] bg-background border rounded-md shadow-md">
-                <DropdownMenuItem asChild>
-                    <Link
-                        href="/curriculums"
-                        className={`w-full block px-3 py-2 text-sm rounded hover:bg-accent hover:text-accent-foreground ${
-                            currentUrl === '/curriculums' ? 'font-semibold bg-accent' : ''
-                        }`}
-                    >
-                        Curriculums
-                    </Link>
-                </DropdownMenuItem>
-                <DropdownMenuItem asChild>
-                    <Link
-                        href="/academic-years"
-                        className={`w-full block px-3 py-2 text-sm rounded hover:bg-accent hover:text-accent-foreground ${
-                            currentUrl === '/academic-years' ? 'font-semibold bg-accent' : ''
-                        }`}
-                    >
-                        Academic Years
-                    </Link>
-                </DropdownMenuItem>
-                <DropdownMenuItem asChild>
-                    <Link
-                        href="/batches"
-                        className={`w-full block px-3 py-2 text-sm rounded hover:bg-accent hover:text-accent-foreground ${
-                            currentUrl === '/batches' ? 'font-semibold bg-accent' : ''
-                        }`}
-                    >
-                        Batches
-                    </Link>
-                </DropdownMenuItem>
-            </DropdownMenuContent>
-        </DropdownMenu>
-    );
+          <DropdownMenuItem asChild>
+            <Link href="/academic-years">
+              <span className="flex items-center gap-2">
+                <CalendarDays className="h-5 w-5" />
+                Academic Years
+              </span>
+            </Link>
+          </DropdownMenuItem>
+
+          <DropdownMenuItem asChild>
+            <Link href="/batches">
+              <span className="flex items-center gap-2">
+                <Users className="h-5 w-5" />
+                Batches
+              </span>
+            </Link>
+          </DropdownMenuItem>
+
+          <DropdownMenuItem asChild>
+            <Link href="/batch-statuses">
+              <span className="flex items-center gap-2">
+                <ListChecks className="h-5 w-5" />
+                Batch Status
+              </span>
+            </Link>
+          </DropdownMenuItem>
+        </DropdownMenuContent>
+      </DropdownMenu>
+    </div>
+  );
 }

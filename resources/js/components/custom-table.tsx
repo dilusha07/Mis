@@ -74,6 +74,18 @@ export const CustomTable = ({ columns, actions, data, from, onDelete, onView, on
                         );
                     }
 
+                    // Download Functionality
+                    if (action.label === 'Download Excel') {
+                        return (
+                            <Button key={index} asChild className={action.className}>
+                                <a href={route(action.route, row.id)}>
+                                    <IconComponent size={18} />
+                                </a>
+                            </Button>
+                        );
+                    }
+
+
                     return (
                         <Link key={index} as="button" href={route(action.route, row.id)} className={action.className}>
                             <IconComponent size={18} />
@@ -123,7 +135,7 @@ export const CustomTable = ({ columns, actions, data, from, onDelete, onView, on
                     ) : (
                         <tr>
                             <td colSpan={7} className="text-md py-4 text-center font-bold text-red-600">
-                                No Curriculums Found!
+                                No Items Found!
                             </td>
                         </tr>
                     )}

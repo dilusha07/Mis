@@ -15,9 +15,9 @@ return new class extends Migration
             $table->bigIncrements('id')->comment('Primary key - student Module registration record ID');
             $table->string('student_id')->unique()->comment('Foreign key - Referring to student table');
             $table->unsignedBigInteger('batch_sem_module_id')->comment('Foreign key - Reference to batch_sem_module table');
-            $table->unsignedBigInteger('module_id')->comment('Foreign key - Reference to module table');
-            $table->unsignedBigInteger('module_reg_type')->comment('Module registration type: 1 - Proper, 2 - Repeat');
-            $table->unsignedInteger('reg_status')->default(1)->comment('Registration status: 0 - Pending, 1 - Active');
+            $table->unsignedBigInteger('module_id')->comment('Foreign key - Reference to modules table');
+            $table->enum('module_reg_type', ['proper', 'repeat'])->comment('Module registration type');
+            $table->enum('reg_status', ['pending', 'active'])->comment('Registration status');
             $table->unsignedTinyInteger('attempts')->comment('Number of attempts get for this module');
             $table->unsignedBigInteger('created_by')->comment('User ID who created this record');
             $table->unsignedBigInteger('modified_by')->comment('User ID who last modified this record');

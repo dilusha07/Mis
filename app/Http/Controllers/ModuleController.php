@@ -3,16 +3,122 @@
 namespace App\Http\Controllers;
 
 use App\Models\Module;
+use App\Models\Curriculum;
+use App\Models\Department;
+use App\Http\Requests\ModuleFormRequest;
+use Exception;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
+use Inertia\Inertia;
 
 class ModuleController extends Controller
 {
     /**
+     * Convert stored JSON string to plain text for display.
+     */
+    private function getModuleDetailsText($moduleDetails)
+    {
+        if (!$moduleDetails) return '';
+        if (is_string($moduleDetails)) {
+            $decoded = json_decode($moduleDetails, true);
+            return is_array($decoded) && isset($decoded['content']) ? (string) $decoded['content'] : (string) $moduleDetails;
+        }
+        return '';
+    }
+
+    /**
+     * Normalize allowed_stream to an array of strings.
+     */
+    private function normalizeAllowedStream($value): array
+    {
+        if (is_array($value)) {
+            return array_values(array_filter(array_map(fn($v) => is_string($v) ? trim($v) : $v, $value), fn($v) => $v !== '' && $v !== null));
+        }
+
+        if (is_string($value)) {
+            $json = json_decode($value, true);
+            if (json_last_error() === JSON_ERROR_NONE && is_array($json)) {
+                return $this->normalizeAllowedStream($json);
+            }
+            // comma-separated list
+            $parts = array_map('trim', explode(',', $value));
+            return array_values(array_filter($parts, fn($v) => $v !== ''));
+        }
+
+        return [];
+    }
+
+    /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
-        //
+        try {
+            $modulesQuery = Module::query();
+
+            if ($request->filled('search')) {
+                $search = $request->string('search');
+                $modulesQuery->where(fn($q) => $q
+                    ->where('module_name', 'like', "%{$search}%")
+                    ->orWhere('module_code', 'like', "%{$search}%")
+                );
+            }
+
+            $totalCount = Module::count();
+            $filteredCount = (clone $modulesQuery)->count();
+            $perPage = (int) ($request->perPage ?? 10);
+
+            if ($perPage === -1) {
+                $data = $modulesQuery->latest()->get()->map(fn($m) => [
+                    'id' => $m->id,
+                    'module_name' => $m->module_name,
+                    'module_code' => $m->module_code,
+                    'module_details' => $this->getModuleDetailsText($m->module_details),
+                    'credits' => $m->credits,
+                    'semester' => $m->semester,
+                    'module_type' => $m->module_type,
+                    'allowed_stream' => $m->allowed_stream,
+                    'curriculum_id' => $m->curriculum_id,
+                    'department_id' => $m->department_id,
+                    'created_at' => $m->created_at?->format('d M Y'),
+                ]);
+
+                $modules = [
+                    'data' => $data,
+                    'total' => $filteredCount,
+                    'per_page' => $perPage,
+                    'from' => 1,
+                    'to' => $filteredCount,
+                    'links' => [],
+                ];
+            } else {
+                $modules = $modulesQuery->latest()->paginate($perPage)->withQueryString();
+                $modules->getCollection()->transform(fn($m) => [
+                    'id' => $m->id,
+                    'module_name' => $m->module_name,
+                    'module_code' => $m->module_code,
+                    'module_details' => $this->getModuleDetailsText($m->module_details),
+                    'credits' => $m->credits,
+                    'semester' => $m->semester,
+                    'module_type' => $m->module_type,
+                    'allowed_stream' => $m->allowed_stream,
+                    'curriculum_id' => $m->curriculum_id,
+                    'department_id' => $m->department_id,
+                    'created_at' => $m->created_at?->format('d M Y'),
+                ]);
+            }
+
+            return Inertia::render('modules/index', [
+                'modules' => $modules,
+                'filters' => $request->only(['search', 'perPage']),
+                'totalCount' => $totalCount,
+                'filteredCount' => $filteredCount,
+            ]);
+
+        } catch (Exception $e) {
+            Log::error('Module index failed: ' . $e->getMessage());
+            return redirect()->back()->with('error', 'Unable to load modules. Please try again!');
+        }
     }
 
     /**
@@ -20,15 +126,56 @@ class ModuleController extends Controller
      */
     public function create()
     {
-        //
+        try {
+            $curriculums = Curriculum::select('id', 'curriculum_name')->orderBy('curriculum_name')->get();
+            $departments = Department::where('dept_type', 'Departments')->select('id', 'dept_name')->orderBy('dept_name')->get();
+
+            return Inertia::render('modules/module-form', [
+                'curriculums' => $curriculums,
+                'departments' => $departments,
+            ]);
+        } catch (Exception $e) {
+            Log::error('Module create form failed: ' . $e->getMessage());
+            return redirect()->back()->with('error', 'Unable to load create form. Please try again!');
+        }
     }
 
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request)
+    public function store(ModuleFormRequest $request)
     {
-        //
+        try {
+            $validatedData = $request->validated();
+
+            if (isset($validatedData['module_details'])) {
+                $content = trim((string) $validatedData['module_details']);
+                $validatedData['module_details'] = json_encode([
+                    'content' => $content,
+                    'type' => 'text',
+                ]);
+            }
+
+            if (isset($validatedData['allowed_stream'])) {
+                $validatedData['allowed_stream'] = $this->normalizeAllowedStream($validatedData['allowed_stream']);
+            }
+
+            $module = Module::create($validatedData + [
+                'created_by' => auth()->id(),
+            ]);
+
+            if ($module) {
+                Log::info('Module created successfully. ID: ' . $module->id . ' by User: ' . auth()->id());
+                return redirect()->route('modules.index')->with('success', 'Module created successfully.');
+            }
+
+            Log::warning('Module creation failed - no module returned');
+            return redirect()->back()->with('error', 'Unable to create module. Please try again!');
+
+        } catch (Exception $e) {
+            Log::error('Module creation failed: ' . $e->getMessage());
+            return redirect()->back()->with('error', 'Unable to create module. Please try again!');
+        }
     }
 
     /**
@@ -36,7 +183,21 @@ class ModuleController extends Controller
      */
     public function show(Module $module)
     {
-        //
+        try {
+            $module->module_details = $this->getModuleDetailsText($module->module_details);
+            $curriculums = Curriculum::select('id', 'curriculum_name')->orderBy('curriculum_name')->get();
+            $departments = Department::where('dept_type', 'Departments')->select('id', 'dept_name')->orderBy('dept_name')->get();
+
+            return Inertia::render('modules/module-form', [
+                'module' => $module,
+                'isView' => true,
+                'curriculums' => $curriculums,
+                'departments' => $departments,
+            ]);
+        } catch (Exception $e) {
+            Log::error('Module show failed. ID: ' . $module->id . ' Error: ' . $e->getMessage());
+            return redirect()->back()->with('error', 'Unable to display module. Please try again!');
+        }
     }
 
     /**
@@ -44,22 +205,91 @@ class ModuleController extends Controller
      */
     public function edit(Module $module)
     {
-        //
+        try {
+            $module->module_details = $this->getModuleDetailsText($module->module_details);
+            $curriculums = Curriculum::select('id', 'curriculum_name')->orderBy('curriculum_name')->get();
+            $departments = Department::where('dept_type', 'Departments')->select('id', 'dept_name')->orderBy('dept_name')->get();
+
+            return Inertia::render('modules/module-form', [
+                'module' => $module,
+                'isEdit' => true,
+                'curriculums' => $curriculums,
+                'departments' => $departments,
+            ]);
+        } catch (Exception $e) {
+            Log::error('Module edit form failed. ID: ' . $module->id . ' Error: ' . $e->getMessage());
+            return redirect()->back()->with('error', 'Unable to load edit form. Please try again!');
+        }
     }
 
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, Module $module)
+    public function update(ModuleFormRequest $request, Module $module)
     {
-        //
+        try {
+            if ($module) {
+                $validatedData = $request->validated();
+
+                if (isset($validatedData['module_details'])) {
+                    $content = trim((string) $validatedData['module_details']);
+                    $validatedData['module_details'] = json_encode([
+                        'content' => $content,
+                        'type' => 'text',
+                    ]);
+                }
+
+                if (isset($validatedData['allowed_stream'])) {
+                    $validatedData['allowed_stream'] = $this->normalizeAllowedStream($validatedData['allowed_stream']);
+                }
+
+                $updated = $module->update($validatedData + [
+                    'modified_by' => auth()->id(),
+                ]);
+
+                if ($updated) {
+                    Log::info('Module updated successfully. ID: ' . $module->id . ' by User: ' . auth()->id());
+                    return redirect()->route('modules.index')->with('success', 'Module updated successfully.');
+                }
+
+                Log::warning('Module update failed - no changes made. ID: ' . $module->id);
+                return redirect()->back()->with('error', 'Unable to update module. Please try again!');
+            }
+
+            Log::warning('Module update failed - module not found');
+            return redirect()->back()->with('error', 'Module not found. Please try again!');
+
+        } catch (Exception $e) {
+            Log::error('Module update failed. ID: ' . $module->id . ' Error: ' . $e->getMessage());
+            return redirect()->back()->with('error', 'Unable to update module. Please try again!');
+        }
     }
 
     /**
-     * Remove the specified resource from storage.
+     * Remove the specified resource in storage.
      */
     public function destroy(Module $module)
     {
-        //
+        try {
+            if ($module) {
+                $moduleId = $module->id;
+                $deleted = $module->delete();
+
+                if ($deleted) {
+                    Log::info('Module deleted successfully. ID: ' . $moduleId . ' by User: ' . auth()->id());
+                    return redirect()->back()->with('success', 'Module deleted successfully.');
+                }
+
+                Log::warning('Module deletion failed - no module deleted. ID: ' . $moduleId);
+                return redirect()->back()->with('error', 'Unable to delete module. Please try again!');
+            }
+
+            Log::warning('Module deletion failed - module not found');
+            return redirect()->back()->with('error', 'Module not found. Please try again!');
+
+        } catch (Exception $e) {
+            Log::error('Module deletion failed. ID: ' . $module->id . ' Error: ' . $e->getMessage());
+            return redirect()->back()->with('error', 'Unable to delete module. Please try again!');
+        }
     }
 }

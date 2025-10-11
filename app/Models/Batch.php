@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 
 class Batch extends Model
@@ -12,7 +13,10 @@ class Batch extends Model
     protected $table = 'batches';
     protected $primaryKey = 'id';
 
-    protected $fillable = [
+    /**
+     * The attributes that are mass assignable.
+     */
+   protected $fillable = [
         'batch_name',
         'curriculum_id',
         'start_date',
@@ -27,4 +31,10 @@ class Batch extends Model
         'created_at' => 'datetime',
         'updated_at' => 'datetime',
     ];
+
+    // Relationship with Curriculum
+    public function curriculum()
+    {
+        return $this->belongsTo(Curriculum::class);
+    }
 }

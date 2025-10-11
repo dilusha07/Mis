@@ -11,6 +11,9 @@ class Curriculum extends Model
 
     protected $table = 'curriculums';
 
+    /**
+     * The attributes that are mass assignable.
+     */
     protected $fillable = [
         'curriculum_code',
         'curriculum_name',

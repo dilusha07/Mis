@@ -2,8 +2,18 @@
 
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
+use Maatwebsite\Excel\Facades\Excel;
 use App\Http\Controllers\CurriculumController;
 use App\Http\Controllers\AcademicYearController;
+use App\Http\Controllers\ModuleController;
+use App\Http\Controllers\BatchSemModuleController;
+use App\Http\Controllers\BatchController;
+use App\Http\Controllers\BatchStatusController;
+use App\Http\Controllers\ModulePrerequisiteController;
+use App\Http\Controllers\ExamAdmissionController;
+use App\Http\Controllers\AcademicAdvisorController;
+use App\Http\Controllers\ExamPlanController;
+use App\Http\Controllers\StuModuleRegisterController;
 
 Route::get('/', function () {
     return Inertia::render('welcome');
@@ -15,8 +25,23 @@ Route::middleware(['auth', 'verified'])->group(function () {
     })->name('dashboard');
 
     Route::resource('curriculums', CurriculumController::class);
-
+    Route::resource('modules', ModuleController::class);
+    Route::resource('batch-sem-modules', BatchSemModuleController::class);
+    Route::resource('prerequisites', ModulePrerequisiteController::class);
     Route::resource('academic-years', AcademicYearController::class);
+    Route::resource('exam-admissions', ExamAdmissionController::class);
+    Route::resource('academic-advisors', AcademicAdvisorController::class);
+    Route::resource('exam-plans', ExamPlanController::class);
+    Route::get('exam-plans/{examPlan}/download-excel', [ExamPlanController::class, 'downloadExcel'])->name('exam-plans.download-excel');
+
+    Route::resource('stu-module-registers', StuModuleRegisterController::class);
+    Route::post('stu-module-registers/register', [StuModuleRegisterController::class, 'register'])->name('stu-module-registers.register');
+
+    Route::resource('batches', BatchController::class);
+
+    Route::resource('batch-statuses',BatchStatusController::class);
+  
+
 });
 
 require __DIR__.'/settings.php';

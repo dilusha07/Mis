@@ -22,10 +22,11 @@ interface LinkProps {
 
 interface AcademicYear {
     id: number;
-    year_code: string;
-    year_name: string;
-    start_date: string;
-    end_date: string;
+    academic_year: string;
+    year_begin: string;
+    year_end: string;
+    status: number;
+    curriculum_id: number;
     created_at: string;
 }
 
@@ -43,13 +44,13 @@ interface FilterProps {
 }
 
 interface IndexProps {
-    academic_years: AcademicYearPagination;
+    academicYears: AcademicYearPagination;
     filters: FilterProps;
     totalCount: number;
     filteredCount: number;
 }
 
-export default function Index({ academic_years, filters, totalCount, filteredCount }: IndexProps) {
+export default function Index({ academicYears, filters, totalCount, filteredCount }: IndexProps) {
     const { flash } = usePage<{ flash?: { success?: string; error?: string } }>().props;
     const flashMessage = flash?.success || flash?.error;
     const [showAlert, setShowAlert] = useState(!!flashMessage);
@@ -157,8 +158,8 @@ export default function Index({ academic_years, filters, totalCount, filteredCou
                 <CustomTable
                     columns={AcademicYearTableConfig.columns}
                     actions={AcademicYearTableConfig.actions}
-                    data={academic_years.data}
-                    from={academic_years.from - 1}
+                    data={academicYears.data}
+                    from={academicYears.from - 1}
                     isModal={false}
                     onDelete={handleDelete}
                     onView={(row) => router.get(route('academic-years.show', row.id))}
@@ -167,7 +168,7 @@ export default function Index({ academic_years, filters, totalCount, filteredCou
 
                 {/* Pagination */}
                 <Pagination
-                    products={academic_years}
+                    products={academicYears}
                     perPage={data.perPage}
                     onPerPageChange={handlePerPageChange}
                     totalCount={totalCount}

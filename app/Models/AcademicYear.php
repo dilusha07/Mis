@@ -12,6 +12,9 @@ class AcademicYear extends Model
     protected $table = 'academic_years';
     protected $primaryKey = 'id';
 
+    /**
+     * The attributes that are mass assignable.
+     */
     protected $fillable = [
         'academic_year',
         'year_begin',
